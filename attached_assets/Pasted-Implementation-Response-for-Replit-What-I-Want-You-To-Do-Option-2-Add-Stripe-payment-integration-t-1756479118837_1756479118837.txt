@@ -1,0 +1,74 @@
+Implementation Response for Replit
+What I Want You To Do:
+Option 2: Add Stripe payment integration to the existing Replit Auth system
+Keep the current Replit Auth (it's working fine) and add the payment/freemium layer on top of it. This is the most practical approach that builds on what's already working.
+Implementation Priority (Do in this order):
+Phase 1: Add User Payment Status to Database
+sql-- Add these columns to existing users table
+ALTER TABLE users ADD COLUMN subscription_status VARCHAR(20) DEFAULT 'free';
+ALTER TABLE users ADD COLUMN stripe_customer_id VARCHAR(255);
+ALTER TABLE users ADD COLUMN payment_date TIMESTAMP;
+ALTER TABLE users ADD COLUMN free_tier_limits JSONB DEFAULT '{"jobs_viewed_today": 0, "last_reset": "2024-01-01"}';
+Phase 2: Implement Basic Feature Gates
+
+Add middleware/hooks to check user.subscription_status
+Show "Upgrade to unlock" overlays on premium features for free users
+Allow free users to see 5 jobs per day (with counter reset)
+Block AI generation, interview practice, job tracking for free users
+
+Phase 3: Add Stripe Payment Flow
+
+Set up Stripe Checkout for £70 one-time payment
+Create /api/payments/create-checkout endpoint
+Add webhook handler at /api/webhooks/stripe to upgrade users after payment
+Create upgrade prompts throughout the app
+
+Phase 4: Polish the Free Experience
+
+Create compelling upgrade moments
+Show sample/demo content for premium features
+Add upgrade CTAs in strategic locations
+
+Stripe Setup:
+Start with Stripe test mode - I'll provide live credentials later. Use these test values:
+
+Price: £70.00 (7000 in pence)
+Currency: GBP
+Payment method: One-time payment (not subscription)
+
+Key Requirements:
+Free Users Can:
+
+✅ Complete basic profile
+✅ Browse 5 jobs per day
+✅ See sample CV/Supporting Info templates
+✅ View pricing information
+
+Free Users Cannot:
+
+❌ Generate AI documents (CV, Supporting Info)
+❌ Use interview practice
+❌ Track job applications
+❌ Access unlimited job search
+❌ Use Q&A generator
+
+After Payment (£70):
+
+✅ All features unlocked permanently
+✅ No ongoing subscription fees
+✅ Full access to all 7 sections
+
+Technical Implementation:
+
+Keep existing Replit Auth - don't change what's working
+Add payment status checks throughout the app
+Create Stripe integration with webhook handling
+Add upgrade prompts at key friction points
+Test payment flow thoroughly in test mode
+
+Questions for You:
+
+Should I create a dedicated /pricing page?
+Where should the main "Upgrade" button be placed?
+Do you want email receipts sent after payment?
+Should I add a "Manage Account" page for paid users?

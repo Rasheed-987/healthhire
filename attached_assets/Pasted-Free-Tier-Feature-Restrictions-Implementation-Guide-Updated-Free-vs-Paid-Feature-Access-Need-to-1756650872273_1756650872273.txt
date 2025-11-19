@@ -1,0 +1,274 @@
+Free Tier Feature Restrictions - Implementation Guide
+🆓 Updated Free vs Paid Feature Access
+Need to clarify and implement proper freemium restrictions throughout the platform.
+
+Free Users CAN Fully Access:
+✅ Section 1: Candidate Profile ("Who are you?")
+FULL ACCESS - No restrictions
+
+Complete profile wizard
+Upload evidence documents
+Build STAR examples
+Values assessment
+Profile completeness meter
+All profile editing and updates
+
+✅ Section 4: Resources Hub (News & Updates)
+FULL ACCESS - No restrictions
+
+View all news and updates
+Read NHS guides and articles
+Access checklists and templates
+Browse mini-courses (view content)
+Read all educational materials
+
+
+Free Users CAN Browse But NOT Use:
+👁️ Section 2: Job Finder
+PREVIEW MODE - Show features but block usage
+javascriptconst JobFinderFree = () => {
+  return (
+    <div className="job-finder-preview">
+      <div className="feature-preview">
+        <h3>🔍 Smart Job Matching</h3>
+        <p>AI-powered role fit scoring to find your perfect NHS positions</p>
+        <div className="preview-content opacity-50">
+          {/* Show 2-3 sample job cards but grayed out */}
+          <div className="sample-jobs">
+            <div className="job-card-preview">
+              <h4>Band 5 Staff Nurse - Emergency Department</h4>
+              <p>Manchester University NHS Foundation Trust</p>
+              <span className="role-fit-badge">Role Fit: 94%</span>
+            </div>
+          </div>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock Job Search - Upgrade Now
+        </button>
+      </div>
+      
+      <div className="feature-preview">
+        <h3>🎯 Advanced Filters</h3>
+        <p>Filter by band, specialty, location, visa sponsorship</p>
+        <div className="filters-preview opacity-50">
+          {/* Show filter interface but disabled */}
+          <select disabled><option>Select Band</option></select>
+          <select disabled><option>Select Specialty</option></select>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock Filters - Upgrade Now
+        </button>
+      </div>
+    </div>
+  );
+};
+👁️ Section 3: Application Documents
+LIMITED PREVIEW - Show CV preview only
+javascriptconst ApplicationDocumentsFree = () => {
+  return (
+    <div className="application-docs-preview">
+      <div className="cv-preview-section">
+        <h3>📄 Your CV Preview</h3>
+        <div className="cv-preview-container">
+          {/* Show only top section of CV */}
+          <div className="cv-preview-visible">
+            <h4>{user.name}</h4>
+            <p>{user.email} | {user.phone}</p>
+            <p>{user.location}</p>
+            <h5>Professional Summary</h5>
+            <p>{user.summary?.substring(0, 150)}...</p>
+          </div>
+          
+          {/* Blur/fade effect for rest of CV */}
+          <div className="cv-preview-locked">
+            <div className="blurred-content">
+              <div className="fake-text-lines">
+                <div className="line"></div>
+                <div className="line"></div>
+                <div className="line short"></div>
+              </div>
+            </div>
+            <div className="unlock-overlay">
+              <button className="upgrade-prompt">
+                🔒 Unlock Full CV - Upgrade for £70
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="feature-preview">
+        <h3>✨ Supporting Information Generator</h3>
+        <p>AI-powered 900-1200 word responses tailored to NHS person specifications</p>
+        <div className="sample-output opacity-50">
+          <textarea 
+            disabled 
+            value="I am writing to express my strong interest in the Staff Nurse position..."
+            rows={4}
+          />
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock AI Generation - Upgrade Now  
+        </button>
+      </div>
+    </div>
+  );
+};
+👁️ Section 5: Interview Practice
+PREVIEW MODE - Show interface but block usage
+javascriptconst InterviewPracticeFree = () => {
+  return (
+    <div className="interview-preview">
+      <h3>🎤 Mock Interview Practice</h3>
+      <p>Practice NHS values-based questions with AI feedback</p>
+      
+      <div className="preview-interface opacity-50">
+        <div className="question-preview">
+          <h4>Sample Question:</h4>
+          <p>"Tell me about a time you showed compassion to a patient"</p>
+        </div>
+        <textarea disabled placeholder="Your answer would go here..."></textarea>
+        <button disabled>Submit for Feedback</button>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Unlock Interview Practice - Upgrade Now
+      </button>
+    </div>
+  );
+};
+👁️ Section 6: Q&A Generator
+PREVIEW MODE - Show sample questions but no generation
+javascriptconst QAGeneratorFree = () => {
+  return (
+    <div className="qa-preview">
+      <h3>❓ Interview Questions Generator</h3>
+      <p>Generate role-specific interview questions with model answers</p>
+      
+      <div className="sample-questions opacity-50">
+        <h4>Sample Questions for Staff Nurse:</h4>
+        <ul>
+          <li>How do you prioritize patient care during busy shifts?</li>
+          <li>Describe your experience with multidisciplinary teamwork</li>
+          <li>How do you handle difficult or distressed patients?</li>
+        </ul>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Generate Questions for Any Role - Upgrade Now
+      </button>
+    </div>
+  );
+};
+👁️ Section 7: Job Tracker & Analytics
+PREVIEW MODE - Show empty dashboard with upgrade prompts
+javascriptconst JobTrackerFree = () => {
+  return (
+    <div className="tracker-preview">
+      <h3>📊 Job Application Tracker</h3>
+      <p>Track applications from draft to offer with Kanban board</p>
+      
+      <div className="preview-dashboard opacity-50">
+        <div className="kanban-preview">
+          <div className="column">
+            <h4>Draft</h4>
+            <div className="empty-column">No applications yet</div>
+          </div>
+          <div className="column">  
+            <h4>Applied</h4>
+            <div className="empty-column">Track your applications here</div>
+          </div>
+          <div className="column">
+            <h4>Interview</h4>
+            <div className="empty-column">Monitor interview progress</div>
+          </div>
+        </div>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Unlock Application Tracking - Upgrade Now
+      </button>
+    </div>
+  );
+};
+
+Free Tier Navigation Implementation:
+Section Card Behavior:
+javascriptconst SectionCard = ({ section, isPaid }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    if (section.id === 'profile' || section.id === 'resources') {
+      // Full access sections
+      navigate(section.path);
+    } else if (!isPaid) {
+      // Preview mode for paid features
+      navigate(`${section.path}/preview`);
+    } else {
+      // Full access for paid users
+      navigate(section.path);
+    }
+  };
+
+  return (
+    <div 
+      className="section-card cursor-pointer" 
+      onClick={handleCardClick}
+    >
+      <h3>{section.title}</h3>
+      <p>{section.description}</p>
+      
+      {!isPaid && section.isPremium && (
+        <div className="premium-badge">
+          <span className="text-yellow-600">👑 Premium</span>
+        </div>
+      )}
+    </div>
+  );
+};
+Upgrade Prompt Component:
+javascriptconst UpgradePrompt = ({ feature }) => {
+  return (
+    <div className="upgrade-prompt-overlay">
+      <div className="upgrade-content">
+        <h3>🔒 Unlock {feature}</h3>
+        <p>Get full access to all HealthHire Portal features for just £70 one-time payment</p>
+        <ul className="upgrade-benefits">
+          <li>✅ Unlimited job searching with AI matching</li>
+          <li>✅ AI-powered CV and Supporting Information generation</li>
+          <li>✅ Interview practice with feedback</li>
+          <li>✅ Application tracking and analytics</li>
+          <li>✅ Lifetime access - no recurring fees</li>
+        </ul>
+        <button 
+          onClick={() => navigate('/upgrade')}
+          className="btn-upgrade bg-green-600 text-white px-6 py-3 rounded-lg"
+        >
+          Upgrade Now - £70 One-Time
+        </button>
+      </div>
+    </div>
+  );
+};
+
+Summary of Free Tier Access:
+✅ FULL ACCESS (Can Use Everything):
+
+Candidate Profile - Complete profile management
+Resources Hub - All news, updates, guides, educational content
+
+👁️ PREVIEW ONLY (Can See But Not Use):
+
+Job Finder - Show interface and sample jobs, block search/details
+Application Documents - Show CV preview (top section only), block generation
+Interview Practice - Show sample questions, block practice sessions
+Q&A Generator - Show sample questions, block generation
+Job Tracker - Show empty dashboard, block tracking functionality
+
+💳 Upgrade Prompts:
+
+Clear "Unlock for £70" buttons throughout preview sections
+Highlight lifetime access value
+Show what they're missing out on
+
+This gives free users enough value to understand the platform while creating strong incentives to upgrade for the core job search and application features.

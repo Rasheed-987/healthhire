@@ -1,0 +1,304 @@
+ CV System Restructure - Important Changes Needed
+
+## 🔄 CV Generation Strategy Change
+
+**Good work on the Supporting Information generator in Job Finder - keep that!** But we need to restructure how CVs work versus Supporting Information.
+
+## Current Structure Issues:
+- CV generator suggestions appearing in Job Finder (remove this)
+- CV and Supporting Information treated the same way (they're different)
+- No connection between Candidate Profile and CV updates
+
+---
+
+## New CV System Architecture:
+
+### 1. Job Finder Page Changes
+✅ **KEEP**: Supporting Information Generator (this is perfect for job-specific tailoring)
+❌ **REMOVE**: Any CV generator suggestions or links from Job Finder
+
+```javascript
+// Job Finder - Only show Supporting Information option
+const JobDetailActions = ({ job }) => {
+  return (
+    <div className="job-actions">
+      <button 
+        onClick={() => generateSupportingInfo(job)}
+        className="bg-blue-600 text-white px-6 py-3"
+      >
+        ✨ Generate Supporting Information for This Role
+      </button>
+      <button 
+        onClick={() => window.open(job.external_url, '_blank')}
+        className="bg-green-600 text-white px-6 py-3"
+      >
+        🔗 Apply for This Role
+      </button>
+      {/* NO CV generator button here */}
+    </div>
+  );
+};
+```
+
+### 2. Application Documents Section Update
+**Change the focus from dual CV/Supporting Info to Supporting Info focused:**
+
+```javascript
+const ApplicationDocumentsCard = () => {
+  return (
+    <div className="section-card">
+      <h2>Application Documents</h2>
+      <p>Generate tailored Supporting Information for NHS applications</p>
+      
+      <div className="features">
+        <div className="feature-item">
+          <h3>Supporting Information Generator</h3>
+          <p>Create tailored 900-1200 word responses for specific roles</p>
+        </div>
+        
+        <div className="feature-item">
+          <h3>Person Spec Mapper</h3>  
+          <p>Ensure you address every essential and desirable criterion</p>
+        </div>
+        
+        <div className="feature-item">
+          <h3>Your Master CV</h3>
+          <p>View and download your up-to-date CV based on your profile</p>
+          <button onClick={() => navigate('/cv-viewer')}>View My CV</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## 3. Candidate Profile - CV Integration System
+
+### Auto-Updating CV Logic:
+**The CV should automatically update when users change their Candidate Profile**
+
+```javascript
+// Candidate Profile - CV Auto-Update System
+const CandidateProfile = () => {
+  const [profile, setProfile] = useState(userProfile);
+  const [cvNeedsUpdate, setCvNeedsUpdate] = useState(false);
+
+  const updateProfile = (newData) => {
+    setProfile(newData);
+    setCvNeedsUpdate(true);
+    
+    // Auto-regenerate CV when profile changes
+    generateUpdatedCV(newData);
+  };
+
+  return (
+    <div className="candidate-profile">
+      {cvNeedsUpdate && (
+        <div className="cv-update-notice bg-blue-50 p-3 rounded">
+          📄 Your CV has been updated based on your profile changes
+          <button onClick={() => navigate('/cv-viewer')}>View Updated CV</button>
+        </div>
+      )}
+      
+      {/* Profile sections */}
+      <WorkExperienceSection onUpdate={updateProfile} />
+      <EducationSection onUpdate={updateProfile} />
+      <SkillsSection onUpdate={updateProfile} />
+    </div>
+  );
+};
+```
+
+### 4. Work Experience - Job Duties Auto-Generator
+
+**When users input a job title, automatically generate job duties using ChatGPT:**
+
+```javascript
+const WorkExperienceSection = () => {
+  const [experiences, setExperiences] = useState([]);
+  
+  const generateJobDuties = async (jobTitle) => {
+    const prompt = `Generate 4-6 realistic job duties for a ${jobTitle} role in healthcare. 
+    Format as bullet points, focus on measurable outcomes and healthcare-specific responsibilities.`;
+    
+    try {
+      const response = await fetch('/api/generate-job-duties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobTitle, prompt })
+      });
+      
+      const duties = await response.json();
+      return duties;
+    } catch (error) {
+      console.error('Failed to generate job duties:', error);
+      return null;
+    }
+  };
+
+  return (
+    <div className="work-experience-section">
+      <h3>Work Experience</h3>
+      
+      {experiences.map((exp, index) => (
+        <div key={index} className="experience-item">
+          <input
+            type="text"
+            placeholder="Job Title (e.g., Staff Nurse, Healthcare Assistant)"
+            value={exp.jobTitle}
+            onChange={(e) => handleJobTitleChange(index, e.target.value)}
+          />
+          
+          {exp.jobTitle && (
+            <button 
+              onClick={() => generateJobDuties(exp.jobTitle)}
+              className="generate-duties-btn text-blue-600"
+            >
+              🤖 Generate typical duties for this role
+            </button>
+          )}
+          
+          <textarea
+            placeholder="Job duties and achievements..."
+            value={exp.duties}
+            onChange={(e) => handleDutiesChange(index, e.target.value)}
+            rows={4}
+          />
+          
+          <input
+            type="text"
+            placeholder="Company/Trust name"
+            value={exp.company}
+          />
+          
+          <div className="date-inputs">
+            <input type="date" placeholder="Start date" />
+            <input type="date" placeholder="End date" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+```
+
+---
+
+## 5. CV Viewer & Download System
+
+**Create a dedicated CV viewer page linked from Application Documents:**
+
+```javascript
+const CVViewerPage = () => {
+  const [cv, setCv] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Generate CV from current profile data
+    generateCVFromProfile()
+      .then(setCv)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const downloadPDF = () => {
+    // Convert CV to PDF and download
+    fetch('/api/cv/download-pdf')
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-nhs-cv.pdf';
+        a.click();
+      });
+  };
+
+  if (loading) return <div>Generating your CV...</div>;
+
+  return (
+    <div className="cv-viewer max-w-4xl mx-auto p-6">
+      <div className="cv-header flex justify-between items-center mb-6">
+        <h1>Your NHS CV</h1>
+        <div className="cv-actions">
+          <button 
+            onClick={downloadPDF}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            📄 Download PDF
+          </button>
+          <button 
+            onClick={() => navigate('/profile')}
+            className="bg-gray-600 text-white px-4 py-2 rounded ml-2"
+          >
+            ✏️ Update Profile
+          </button>
+        </div>
+      </div>
+
+      <div className="cv-content bg-white p-8 shadow-lg">
+        {/* CV content here */}
+        <div className="cv-section">
+          <h2>{cv.personalInfo.name}</h2>
+          <p>{cv.personalInfo.email} | {cv.personalInfo.phone}</p>
+          <p>{cv.personalInfo.location}</p>
+        </div>
+
+        <div className="cv-section">
+          <h3>Professional Summary</h3>
+          <p>{cv.summary}</p>
+        </div>
+
+        <div className="cv-section">
+          <h3>Work Experience</h3>
+          {cv.experience.map(exp => (
+            <div key={exp.id} className="experience-item">
+              <h4>{exp.jobTitle} - {exp.company}</h4>
+              <p className="dates">{exp.startDate} - {exp.endDate}</p>
+              <ul>
+                {exp.duties.map(duty => <li key={duty}>{duty}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Education, Skills, etc. */}
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## 6. Updated Information Architecture:
+
+### Candidate Profile → CV (One-Time, Auto-Updates)
+- User completes profile once
+- CV automatically generates from profile data  
+- Any profile changes update the CV
+- Users can view/download from Application Documents section
+
+### Job Finder → Supporting Information (Job-Specific, Tailored)
+- User finds specific job
+- Generates tailored Supporting Information for that role
+- 900-1200 words addressing person specification
+- Can generate multiple versions for different roles
+
+---
+
+## Implementation Summary:
+
+✅ **Remove CV generator from Job Finder** - keep only Supporting Information
+✅ **Update Application Documents card** - focus on Supporting Info + CV viewer link
+✅ **Create CV auto-update system** - CV reflects profile changes automatically  
+✅ **Add job duties generator** - ChatGPT suggests duties based on job titles
+✅ **Build CV viewer page** - view and download PDF of current CV
+✅ **Separate CV (static) from Supporting Info (tailored)** - different purposes
+
+This structure makes more sense: 
+- **CV = One master document** based on your profile
+- **Supporting Information = Job-specific tailored responses**
+
+Both serve different purposes in NHS applications!

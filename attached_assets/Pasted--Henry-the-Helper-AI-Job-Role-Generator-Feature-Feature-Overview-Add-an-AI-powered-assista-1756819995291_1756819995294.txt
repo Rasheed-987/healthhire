@@ -1,0 +1,377 @@
+# Henry the Helper - AI Job Role Generator Feature
+
+## Feature Overview
+Add an AI-powered assistant called "Henry the Helper" that generates job duties when users fill out job titles, making the job application process easier and more comprehensive.
+
+## User Experience Flow
+
+### 1. Job Title Input Section
+```
+┌─────────────────────────────────────┐
+│ Job Title: [Frontend Developer    ] │
+│                                     │
+│ [🤖 Generate Job Duties with Henry] │
+└─────────────────────────────────────┘
+```
+
+### 2. After Clicking Generate Button
+```
+┌─────────────────────────────────────┐
+│ 🤖 Henry the Helper is working...   │
+│ ⏳ Generating job duties for you... │
+└─────────────────────────────────────┘
+```
+
+### 3. Generated Results Display
+```
+┌─────────────────────────────────────────────────────┐
+│ 🤖 Henry the Helper generated these job duties:     │
+│                                                     │
+│ 1. Build and maintain website features using       │
+│    modern web technologies like React and          │
+│    JavaScript to create smooth user experiences    │
+│                                                     │
+│ 2. Work closely with designers to turn visual      │
+│    mockups into interactive web pages that work    │
+│    perfectly on all devices and browsers           │
+│                                                     │
+│ 3. Test website functionality regularly to find    │
+│    and fix bugs, ensuring users have a seamless   │
+│    experience when visiting the site               │
+│                                                     │
+│ 4. Collaborate with backend developers to connect  │
+│    frontend interfaces with server data and APIs   │
+│    for dynamic content display                     │
+│                                                     │
+│ ⚠️ Disclaimer: Henry can make mistakes! Please     │
+│    double-check this information and adjust as     │
+│    needed for your specific role.                  │
+│                                                     │
+│ [✅ Use These Duties] [🔄 Generate New Ones]       │
+└─────────────────────────────────────────────────────┘
+```
+
+## Technical Implementation
+
+### 1. UI Components
+
+#### Generate Button Component
+```jsx
+const HenryGenerateButton = ({ jobTitle, onGenerate }) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  const handleGenerate = async () => {
+    if (!jobTitle.trim()) {
+      alert('Please enter a job title first!');
+      return;
+    }
+    
+    setIsGenerating(true);
+    await onGenerate(jobTitle);
+    setIsGenerating(false);
+  };
+  
+  return (
+    <button 
+      onClick={handleGenerate}
+      disabled={isGenerating || !jobTitle.trim()}
+      className="henry-generate-btn"
+    >
+      {isGenerating ? (
+        <>
+          <span className="spinner">⏳</span>
+          Henry is working...
+        </>
+      ) : (
+        <>
+          🤖 Generate Job Duties with Henry
+        </>
+      )}
+    </button>
+  );
+};
+```
+
+#### Results Display Component
+```jsx
+const HenryResults = ({ jobDuties, onAccept, onRegenerate }) => {
+  return (
+    <div className="henry-results">
+      <div className="henry-header">
+        🤖 Henry the Helper generated these job duties:
+      </div>
+      
+      <div className="job-duties-list">
+        {jobDuties.map((duty, index) => (
+          <div key={index} className="duty-item">
+            <span className="duty-number">{index + 1}.</span>
+            <span className="duty-text">{duty}</span>
+          </div>
+        ))}
+      </div>
+      
+      <div className="henry-disclaimer">
+        ⚠️ <strong>Disclaimer:</strong> Henry can make mistakes! 
+        Please double-check this information and adjust as needed 
+        for your specific role.
+      </div>
+      
+      <div className="henry-actions">
+        <button onClick={onAccept} className="accept-btn">
+          ✅ Use These Duties
+        </button>
+        <button onClick={onRegenerate} className="regenerate-btn">
+          🔄 Generate New Ones
+        </button>
+      </div>
+    </div>
+  );
+};
+```
+
+### 2. ChatGPT Integration
+
+#### API Call Function
+```javascript
+const generateJobDutiesWithHenry = async (jobTitle) => {
+  const prompt = `Create 4 job duties for role ${jobTitle}, make them human and simple language easy to understand dont use dashes`;
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are Henry the Helper, a friendly AI assistant that helps people write job duties. Write in simple, human language without using bullet points or dashes. Make each duty 1-2 sentences long and easy to understand.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.choices && data.choices[0]) {
+      const content = data.choices[0].message.content;
+      return parseJobDuties(content);
+    }
+    
+    throw new Error('No response from Henry');
+    
+  } catch (error) {
+    console.error('Henry encountered an error:', error);
+    throw new Error('Henry is taking a break. Please try again later!');
+  }
+};
+
+// Parse the response into individual duties
+const parseJobDuties = (content) => {
+  // Split by numbers (1., 2., 3., 4.) or by line breaks
+  const duties = content
+    .split(/\d+\./)
+    .map(duty => duty.trim())
+    .filter(duty => duty.length > 0)
+    .slice(0, 4); // Ensure only 4 duties
+    
+  return duties;
+};
+```
+
+### 3. Main Component Integration
+
+```javascript
+const JobApplicationForm = () => {
+  const [jobTitle, setJobTitle] = useState('');
+  const [generatedDuties, setGeneratedDuties] = useState(null);
+  const [jobDuties, setJobDuties] = useState(['', '', '', '']);
+  
+  const handleGenerateWithHenry = async (title) => {
+    try {
+      const duties = await generateJobDutiesWithHenry(title);
+      setGeneratedDuties(duties);
+    } catch (error) {
+      alert(`Henry says: ${error.message}`);
+    }
+  };
+  
+  const handleAcceptDuties = () => {
+    setJobDuties(generatedDuties);
+    setGeneratedDuties(null);
+  };
+  
+  const handleRegenerateDuties = () => {
+    handleGenerateWithHenry(jobTitle);
+  };
+  
+  return (
+    <div className="job-form">
+      <div className="form-group">
+        <label htmlFor="jobTitle">Job Title:</label>
+        <input
+          type="text"
+          value={jobTitle}
+          onChange={(e) => setJobTitle(e.target.value)}
+          placeholder="e.g., Frontend Developer"
+        />
+        
+        <HenryGenerateButton 
+          jobTitle={jobTitle}
+          onGenerate={handleGenerateWithHenry}
+        />
+      </div>
+      
+      {generatedDuties && (
+        <HenryResults
+          jobDuties={generatedDuties}
+          onAccept={handleAcceptDuties}
+          onRegenerate={handleRegenerateDuties}
+        />
+      )}
+      
+      {/* Rest of your form... */}
+    </div>
+  );
+};
+```
+
+## Styling Suggestions
+
+### CSS for Henry Components
+```css
+.henry-generate-btn {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.henry-generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.henry-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.henry-results {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+.henry-header {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.duty-item {
+  background: white;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border-left: 4px solid #4CAF50;
+  display: flex;
+  gap: 10px;
+}
+
+.duty-number {
+  font-weight: bold;
+  color: #4CAF50;
+  min-width: 20px;
+}
+
+.henry-disclaimer {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 15px 0;
+  font-size: 14px;
+  color: #856404;
+}
+
+.henry-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.accept-btn, .regenerate-btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.accept-btn {
+  background: #28a745;
+  color: white;
+}
+
+.regenerate-btn {
+  background: #6c757d;
+  color: white;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+## Error Handling & Edge Cases
+
+1. **Empty Job Title:** Show alert asking user to enter job title first
+2. **API Failure:** Display friendly message "Henry is taking a break"
+3. **Invalid Response:** Fallback to manual entry with helpful message
+4. **Rate Limiting:** Implement cooldown period between requests
+5. **Long Job Titles:** Truncate or validate input length
+
+## Security & Cost Considerations
+
+1. **API Key Security:** Store in environment variables, never in frontend
+2. **Rate Limiting:** Implement user-based rate limiting
+3. **Input Sanitization:** Clean job title input before sending to API
+4. **Cost Control:** Monitor API usage and set monthly limits
+5. **Caching:** Cache common job titles to reduce API calls
+
+## User Guidance
+
+### Help Text to Display
+"Henry the Helper can generate job duties for common roles. Simply enter your job title and click the generate button. Henry will create 4 duties in simple, easy-to-understand language. Remember to review and customize them for your specific needs!"
+
+This feature will make job applications much easier while maintaining the friendly, helpful personality of Henry the Helper!

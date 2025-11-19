@@ -1,0 +1,1558 @@
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthHire Portal - NHS Career Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(210 20% 98%);
+            --foreground: hsl(210 40% 8%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(210 40% 8%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(210 40% 8%);
+            --primary: hsl(208 100% 35%);
+            --primary-foreground: hsl(0 0% 98%);
+            --secondary: hsl(172 100% 32%);
+            --secondary-foreground: hsl(0 0% 98%);
+            --muted: hsl(210 40% 96%);
+            --muted-foreground: hsl(210 10% 40%);
+            --accent: hsl(208 100% 26%);
+            --accent-foreground: hsl(0 0% 98%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(0 0% 98%);
+            --border: hsl(210 20% 90%);
+            --input: hsl(210 40% 96%);
+            --ring: hsl(208 100% 35%);
+            --radius: 8px;
+        }
+
+        .dark {
+            --background: hsl(210 30% 8%);
+            --foreground: hsl(210 40% 98%);
+            --card: hsl(210 25% 11%);
+            --card-foreground: hsl(210 40% 98%);
+            --popover: hsl(210 25% 11%);
+            --popover-foreground: hsl(210 40% 98%);
+            --primary: hsl(208 100% 50%);
+            --primary-foreground: hsl(210 30% 8%);
+            --secondary: hsl(172 100% 40%);
+            --secondary-foreground: hsl(210 30% 8%);
+            --muted: hsl(210 25% 16%);
+            --muted-foreground: hsl(210 10% 60%);
+            --accent: hsl(208 100% 60%);
+            --accent-foreground: hsl(210 30% 8%);
+            --destructive: hsl(0 84% 50%);
+            --destructive-foreground: hsl(0 0% 98%);
+            --border: hsl(210 25% 20%);
+            --input: hsl(210 25% 16%);
+            --ring: hsl(208 100% 50%);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        
+        .tab-active {
+            border-bottom: 2px solid hsl(var(--primary));
+            color: hsl(var(--primary));
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-fill {
+            transition: stroke-dashoffset 0.6s ease-in-out;
+        }
+
+        .star-example-card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .star-example-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .job-card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .job-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="h-full bg-background text-foreground antialiased">
+    
+    <!-- @COMPONENT: NavigationHeader -->
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                        <i class="fas fa-heartbeat text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-foreground">HealthHire</h1>
+                        <p class="text-xs text-muted-foreground">Portal</p>
+                    </div>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#dashboard" class="text-sm font-medium text-foreground hover:text-primary transition-colors tab-active">Dashboard</a>
+                    <a href="#jobs" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Find Jobs</a>
+                    <a href="#documents" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">AI Documents</a>
+                    <a href="#interview" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Interview Prep</a>
+                    <a href="#applications" class="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Applications</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <button class="relative p-2 text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-xs text-destructive-foreground flex items-center justify-center">3</span>
+                    </button>
+                    <div class="flex items-center space-x-3">
+                        <!-- Mock user profile image placeholder -->
+                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100" alt="Profile" class="h-8 w-8 rounded-full" data-mock="true">
+                        <div class="hidden md:block">
+                            <p class="text-sm font-medium" data-bind="user.name" data-mock="true">Dr. Sarah Johnson</p>
+                            <p class="text-xs text-muted-foreground" data-mock="true">Band 6 Nurse</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: NavigationHeader -->
+
+    <main class="flex-1">
+        <!-- @COMPONENT: DashboardOverview -->
+        <section id="dashboard" class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Welcome Section with Hero Content -->
+            <div class="mb-8">
+                <!-- NHS hospital environment hero image -->
+                <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-secondary p-8 text-primary-foreground">
+                    <div class="relative z-10">
+                        <h1 class="text-3xl font-bold mb-2">Welcome back, <span data-bind="user.firstName" data-mock="true">Sarah</span>!</h1>
+                        <p class="text-lg opacity-90 mb-6">Let's continue building your NHS career journey</p>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button class="bg-primary-foreground text-primary px-6 py-3 rounded-lg font-medium hover:bg-opacity-90 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>New Application
+                            </button>
+                            <button class="border border-primary-foreground text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary-foreground hover:bg-opacity-10 transition-colors">
+                                <i class="fas fa-search mr-2"></i>Browse Jobs
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Healthcare professionals at work background overlay -->
+                    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                    <img src="https://pixabay.com/get/g528dc4ba9fce05f2a387a51f53e9379a0b353d36bcac43892053874f9e7d3f02e5b811d471edc9c289746d5c378e7eb5009fcfaf230235b1936e6f78e51ac673_1280.jpg" alt="Healthcare professionals working in hospital" class="absolute inset-0 w-full h-full object-cover -z-10" data-mock="true">
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Profile Completion</p>
+                            <p class="text-3xl font-bold text-foreground" data-mock="true">87%</p>
+                        </div>
+                        <div class="relative">
+                            <svg class="w-12 h-12 progress-ring">
+                                <circle cx="24" cy="24" r="20" stroke="hsl(var(--muted))" stroke-width="4" fill="transparent"/>
+                                <circle cx="24" cy="24" r="20" stroke="hsl(var(--primary))" stroke-width="4" fill="transparent"
+                                    stroke-dasharray="125.6" stroke-dashoffset="16.3" class="progress-ring-fill"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-user-md text-primary text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Applications</p>
+                            <p class="text-3xl font-bold text-foreground" data-mock="true">12</p>
+                            <p class="text-xs text-secondary">+3 this week</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-secondary/10 flex items-center justify-center">
+                            <i class="fas fa-file-medical text-secondary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Interviews Scheduled</p>
+                            <p class="text-3xl font-bold text-foreground" data-mock="true">3</p>
+                            <p class="text-xs text-accent">Next: Tomorrow 2pm</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center">
+                            <i class="fas fa-video text-accent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card p-6 rounded-lg border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-muted-foreground">Match Score</p>
+                            <p class="text-3xl font-bold text-foreground" data-mock="true">94%</p>
+                            <p class="text-xs text-primary">Excellent fit</p>
+                        </div>
+                        <div class="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <i class="fas fa-bullseye text-primary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions & Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Quick Actions -->
+                <div class="lg:col-span-2">
+                    <h2 class="text-xl font-semibold mb-6 text-foreground">Quick Actions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-card p-6 rounded-lg border border-border cursor-pointer hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="h-12 w-12 rounded-lg feature-icon flex items-center justify-center">
+                                    <i class="fas fa-magic text-white text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground mb-1">Generate Supporting Information</h3>
+                                    <p class="text-sm text-muted-foreground mb-3">AI-powered 900-word NHS applications with values alignment</p>
+                                    <button class="text-primary text-sm font-medium hover:underline">Generate Now →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-card p-6 rounded-lg border border-border cursor-pointer hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="h-12 w-12 rounded-lg bg-secondary/20 flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-secondary text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground mb-1">Update CV</h3>
+                                    <p class="text-sm text-muted-foreground mb-3">NHS-compliant 2-page format with STAR methodology</p>
+                                    <button class="text-secondary text-sm font-medium hover:underline">Edit CV →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-card p-6 rounded-lg border border-border cursor-pointer hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="h-12 w-12 rounded-lg bg-accent/20 flex items-center justify-center">
+                                    <i class="fas fa-comments text-accent text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground mb-1">Practice Interviews</h3>
+                                    <p class="text-sm text-muted-foreground mb-3">AI-powered mock interviews with NHS values focus</p>
+                                    <button class="text-accent text-sm font-medium hover:underline">Start Practice →</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-card p-6 rounded-lg border border-border cursor-pointer hover:shadow-md transition-shadow">
+                            <div class="flex items-start space-x-4">
+                                <div class="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                                    <i class="fas fa-search-plus text-primary text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-foreground mb-1">Job Recommendations</h3>
+                                    <p class="text-sm text-muted-foreground mb-3">AI-matched positions based on your profile</p>
+                                    <button class="text-primary text-sm font-medium hover:underline">View Matches →</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Completion Sidebar -->
+                <div>
+                    <div class="bg-card p-6 rounded-lg border border-border">
+                        <h3 class="text-lg font-semibold mb-4 text-foreground">Complete Your Profile</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                                <span class="text-sm text-muted-foreground line-through">Basic Information</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                                    <i class="fas fa-check text-white text-xs"></i>
+                                </div>
+                                <span class="text-sm text-muted-foreground line-through">Professional Qualifications</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="h-5 w-5 rounded-full bg-secondary flex items-center justify-center">
+                                    <i class="fas fa-clock text-white text-xs"></i>
+                                </div>
+                                <span class="text-sm text-foreground font-medium">STAR Examples (3/5 complete)</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="h-5 w-5 rounded-full bg-border"></div>
+                                <span class="text-sm text-muted-foreground">Upload Certificates</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="h-5 w-5 rounded-full bg-border"></div>
+                                <span class="text-sm text-muted-foreground">NHS Values Assessment</span>
+                            </div>
+                        </div>
+                        <button class="w-full mt-6 bg-secondary text-secondary-foreground py-2 rounded-lg font-medium hover:bg-secondary/90 transition-colors">
+                            Continue Setup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: DashboardOverview -->
+
+        <!-- @COMPONENT: JobSearchSection -->
+        <section id="jobs" class="bg-muted/30 py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-foreground mb-2">Find Your Perfect NHS Role</h2>
+                    <p class="text-muted-foreground">AI-powered matching for healthcare professionals</p>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="bg-card p-6 rounded-lg border border-border mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Job Title / Keywords</label>
+                            <input type="text" placeholder="e.g. Band 5 Nurse, Physiotherapist" 
+                                class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring focus:border-transparent" data-mock="true">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Location</label>
+                            <input type="text" placeholder="e.g. Manchester, London" 
+                                class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring focus:border-transparent" data-mock="true">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Pay Band</label>
+                            <select class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring focus:border-transparent" data-mock="true">
+                                <option>Any Band</option>
+                                <option>Band 5</option>
+                                <option>Band 6</option>
+                                <option>Band 7</option>
+                                <option>Band 8a</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-foreground mb-2">Specialty</label>
+                            <select class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring focus:border-transparent" data-mock="true">
+                                <option>All Specialties</option>
+                                <option>Emergency Medicine</option>
+                                <option>Critical Care</option>
+                                <option>Medical Ward</option>
+                                <option>Surgical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-4">
+                        <button class="text-primary text-sm font-medium hover:underline">
+                            <i class="fas fa-sliders-h mr-2"></i>Advanced Filters
+                        </button>
+                        <button class="bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-search mr-2"></i>Search Jobs
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Job Results -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <p class="text-muted-foreground" data-mock="true">Found 47 NHS positions matching your profile</p>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-muted-foreground">Sort by:</span>
+                            <select class="text-sm border border-border rounded-lg px-3 py-2 bg-input" data-mock="true">
+                                <option>Best Match</option>
+                                <option>Newest First</option>
+                                <option>Salary: High to Low</option>
+                                <option>Location Distance</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- @MAP: jobResults.map(job => ( -->
+                    <div class="job-card bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="text-lg font-semibold text-foreground" data-mock="true">Band 6 Staff Nurse - Emergency Department</h3>
+                                    <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">94% Match</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mb-1" data-mock="true">Manchester University NHS Foundation Trust</p>
+                                <div class="flex items-center space-x-4 text-sm text-muted-foreground">
+                                    <span><i class="fas fa-map-marker-alt mr-1"></i>Manchester</span>
+                                    <span><i class="fas fa-pound-sign mr-1"></i>£32,306 - £39,027</span>
+                                    <span><i class="fas fa-clock mr-1"></i>Full-time</span>
+                                    <span><i class="fas fa-calendar mr-1"></i>Permanent</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                                <button class="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-sm font-medium text-foreground mb-2">Key Requirements Match:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ NMC Registration</span>
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ Emergency Care</span>
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ Band 5+ Experience</span>
+                                <span class="bg-secondary/10 text-secondary px-2 py-1 rounded-full text-xs">+ Trauma experience</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4 text-xs text-muted-foreground">
+                                <span>Posted 2 days ago</span>
+                                <span>15 applicants</span>
+                                <span>Closes in 12 days</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="text-primary border border-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors">
+                                    View Details
+                                </button>
+                                <button class="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                                    Quick Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-card bg-card p-6 rounded-lg border border-border">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="text-lg font-semibold text-foreground" data-mock="true">Band 7 Clinical Lead - ICU</h3>
+                                    <span class="bg-secondary/10 text-secondary px-2 py-1 rounded-full text-xs font-medium">89% Match</span>
+                                </div>
+                                <p class="text-sm text-muted-foreground mb-1" data-mock="true">Guy's and St Thomas' NHS Foundation Trust</p>
+                                <div class="flex items-center space-x-4 text-sm text-muted-foreground">
+                                    <span><i class="fas fa-map-marker-alt mr-1"></i>London</span>
+                                    <span><i class="fas fa-pound-sign mr-1"></i>£40,057 - £45,839</span>
+                                    <span><i class="fas fa-clock mr-1"></i>Full-time</span>
+                                    <span><i class="fas fa-calendar mr-1"></i>Permanent</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                                    <i class="far fa-bookmark"></i>
+                                </button>
+                                <button class="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-sm font-medium text-foreground mb-2">Key Requirements Match:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ Leadership Experience</span>
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ Critical Care</span>
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">✓ Mentoring Skills</span>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">? Teaching Qualification</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4 text-xs text-muted-foreground">
+                                <span>Posted 1 week ago</span>
+                                <span>8 applicants</span>
+                                <span>Closes in 8 days</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="text-primary border border-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary hover:text-primary-foreground transition-colors">
+                                    View Details
+                                </button>
+                                <button class="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                                    Quick Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: JobSearchSection -->
+
+        <!-- @COMPONENT: AIDocumentGeneration -->
+        <section id="documents" class="py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-foreground mb-4">AI-Powered Document Creation</h2>
+                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Generate professional NHS applications, CVs, and Supporting Information tailored to each role</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Document Generator Interface -->
+                    <div class="space-y-6">
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h3 class="text-xl font-semibold text-foreground mb-4">Generate Supporting Information</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Select Job Application</label>
+                                    <select class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring" data-mock="true">
+                                        <option>Band 6 Staff Nurse - Emergency Department (Manchester)</option>
+                                        <option>Band 7 Clinical Lead - ICU (London)</option>
+                                        <option>Band 5 Staff Nurse - Medical Ward (Birmingham)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Tone & Style</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <button class="p-3 border-2 border-primary rounded-lg text-sm font-medium text-primary bg-primary/5">
+                                            Overseas Professional
+                                        </button>
+                                        <button class="p-3 border border-border rounded-lg text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                                            Career Change
+                                        </button>
+                                        <button class="p-3 border border-border rounded-lg text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                                            Early Career
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Focus Areas (Select up to 3)</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                            <span class="text-sm">Patient Care</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                            <span class="text-sm">Teamwork</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                            <span class="text-sm">Leadership</span>
+                                        </label>
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                            <span class="text-sm">Communication</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button class="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors" data-event="click:generateDocument">
+                                    <i class="fas fa-magic mr-2"></i>Generate Supporting Information (900-1200 words)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STAR Examples Builder -->
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Your STAR Examples</h3>
+                            <div class="space-y-4">
+                                <!-- @MAP: starExamples.map(example => ( -->
+                                <div class="star-example-card p-4 border border-border rounded-lg cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-medium text-foreground" data-mock="true">Patient Emergency Response</h4>
+                                        <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">Complete</span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground mb-2" data-mock="true">Managed critical patient deterioration during night shift...</p>
+                                    <div class="flex items-center space-x-4 text-xs text-muted-foreground">
+                                        <span>NHS Values: Compassion, Excellence</span>
+                                        <span>Used in 3 applications</span>
+                                    </div>
+                                </div>
+
+                                <div class="star-example-card p-4 border border-border rounded-lg cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-medium text-foreground" data-mock="true">Team Leadership During Staff Shortage</h4>
+                                        <span class="bg-secondary/10 text-secondary px-2 py-1 rounded-full text-xs">Draft</span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground mb-2" data-mock="true">Led skeleton team during COVID surge period...</p>
+                                    <div class="flex items-center space-x-4 text-xs text-muted-foreground">
+                                        <span>NHS Values: Respect, Working Together</span>
+                                        <span>Used in 1 application</span>
+                                    </div>
+                                </div>
+                                <!-- @END_MAP )) -->
+
+                                <button class="w-full p-4 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Add New STAR Example
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Preview -->
+                    <div class="bg-card rounded-lg border border-border">
+                        <div class="p-6 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-foreground">Document Preview</h3>
+                                <div class="flex items-center space-x-2">
+                                    <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <!-- @FUNCTIONALITY: This should display AI-generated content with real-time preview -->
+                            <div class="prose prose-sm max-w-none" data-mock="true">
+                                <h4 class="text-base font-semibold mb-3">Supporting Information - Emergency Department Staff Nurse Position</h4>
+                                
+                                <p class="text-sm text-muted-foreground mb-4">
+                                    As a dedicated nursing professional with over 5 years of experience in acute care settings, I am excited to apply for the Band 6 Staff Nurse position in the Emergency Department at Manchester University NHS Foundation Trust. My commitment to the NHS values of compassion, respect, dignity, excellence, working together, and improving lives aligns perfectly with your trust's mission to provide outstanding patient care.
+                                </p>
+
+                                <h5 class="font-medium text-foreground mb-2">Patient-Centered Care Excellence</h5>
+                                <p class="text-sm text-muted-foreground mb-4">
+                                    During my tenure in the Emergency Department at my current trust, I demonstrated exceptional patient care when managing a 78-year-old patient presenting with chest pain and confusion. The patient was anxious and unable to provide clear history. I took the initiative to reassure the patient through active listening and clear communication, coordinated with the multidisciplinary team for comprehensive assessment, and ensured family members were updated throughout the process. As a result, the patient received timely treatment for their acute coronary syndrome and the family expressed gratitude for the compassionate care provided...
+                                </p>
+
+                                <div class="bg-muted/50 p-4 rounded-lg">
+                                    <p class="text-xs text-muted-foreground">
+                                        <i class="fas fa-robot mr-1"></i>AI generated content based on your STAR examples and NHS values mapping
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: AIDocumentGeneration -->
+
+        <!-- @COMPONENT: InterviewPreparation -->
+        <section id="interview" class="bg-muted/30 py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-foreground mb-4">Interview Preparation</h2>
+                    <p class="text-lg text-muted-foreground max-w-2xl mx-auto">Practice with AI-powered mock interviews focused on NHS values and clinical scenarios</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Interview Practice Interface -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Medical professionals interview preparation scene -->
+                        <div class="bg-card rounded-lg border border-border overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400" alt="Healthcare professionals in interview preparation setting" class="w-full h-48 object-cover" data-mock="true">
+                            <div class="p-6">
+                                <h3 class="text-xl font-semibold text-foreground mb-4">Mock Interview Session</h3>
+                                
+                                <div class="bg-accent/5 border border-accent/20 rounded-lg p-4 mb-6">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="h-8 w-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-robot text-white text-sm"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-accent mb-1">AI Interviewer</p>
+                                            <p class="text-sm text-foreground" data-mock="true">
+                                                "Tell me about a time when you had to deal with a difficult patient or family member. How did you handle the situation while maintaining NHS values of compassion and respect?"
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-foreground">Your Response</span>
+                                        <span class="text-xs text-muted-foreground">Time remaining: 2:15</span>
+                                    </div>
+                                    
+                                    <div class="relative">
+                                        <textarea 
+                                            rows="6" 
+                                            placeholder="Start your response using the STAR method: Situation, Task, Action, Result..."
+                                            class="w-full p-4 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring resize-none"
+                                            data-mock="true"></textarea>
+                                        <button class="absolute bottom-3 right-3 p-2 text-muted-foreground hover:text-primary transition-colors">
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <button class="text-primary hover:underline text-sm font-medium">
+                                                <i class="fas fa-lightbulb mr-1"></i>Get STAR Hint
+                                            </button>
+                                            <button class="text-primary hover:underline text-sm font-medium">
+                                                <i class="fas fa-history mr-1"></i>Use Previous Example
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <button class="text-muted-foreground border border-border px-4 py-2 rounded-lg text-sm hover:bg-muted transition-colors">
+                                                Skip Question
+                                            </button>
+                                            <button class="bg-primary text-primary-foreground px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                                                Submit Answer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Feedback Display -->
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h4 class="text-lg font-semibold text-foreground mb-4">AI Feedback on Previous Response</h4>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-sm font-medium text-foreground">Overall Score:</span>
+                                        <span class="bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm font-medium" data-mock="true">8.2/10</span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-primary" data-mock="true">9/10</div>
+                                        <div class="text-sm text-muted-foreground">STAR Structure</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-secondary" data-mock="true">8/10</div>
+                                        <div class="text-sm text-muted-foreground">NHS Values</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-accent" data-mock="true">7/10</div>
+                                        <div class="text-sm text-muted-foreground">Clarity</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-muted/50 p-4 rounded-lg">
+                                    <h5 class="font-medium text-foreground mb-2">Improvement Suggestions:</h5>
+                                    <ul class="text-sm text-muted-foreground space-y-1">
+                                        <li data-mock="true">• Excellent STAR structure - clearly defined situation and outcome</li>
+                                        <li data-mock="true">• Strong demonstration of NHS values, particularly compassion and respect</li>
+                                        <li data-mock="true">• Consider adding specific metrics to quantify the result</li>
+                                        <li data-mock="true">• Could expand on how this experience shaped your future practice</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interview Progress Sidebar -->
+                    <div class="space-y-6">
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Interview Progress</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-foreground">Emergency Department Prep</span>
+                                    <span class="text-sm font-medium text-primary" data-mock="true">7/10 complete</span>
+                                </div>
+                                <div class="w-full bg-muted rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 70%"></div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-check text-primary"></i>
+                                        <span class="text-sm text-muted-foreground">Values-based questions</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-check text-primary"></i>
+                                        <span class="text-sm text-muted-foreground">Clinical scenarios</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-clock text-secondary"></i>
+                                        <span class="text-sm text-foreground font-medium">Leadership questions</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <i class="fas fa-circle text-muted-foreground"></i>
+                                        <span class="text-sm text-muted-foreground">Situational judgment</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Practice Streak</h3>
+                            
+                            <div class="text-center mb-4">
+                                <div class="text-3xl font-bold text-secondary" data-mock="true">7</div>
+                                <div class="text-sm text-muted-foreground">days in a row</div>
+                            </div>
+
+                            <div class="grid grid-cols-7 gap-1 mb-4">
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                                <div class="h-8 bg-secondary rounded-sm"></div>
+                            </div>
+
+                            <div class="text-xs text-center text-muted-foreground space-x-2">
+                                <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                            </div>
+                        </div>
+
+                        <!-- Career development healthcare focus -->
+                        <div class="bg-card p-6 rounded-lg border border-border">
+                            <h3 class="text-lg font-semibold text-foreground mb-4">Next Interview</h3>
+                            
+                            <div class="bg-gradient-to-r from-accent/10 to-primary/10 p-4 rounded-lg border border-primary/20">
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+                                        <i class="fas fa-video text-primary-foreground"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-foreground" data-mock="true">Band 6 Staff Nurse</h4>
+                                        <p class="text-sm text-muted-foreground" data-mock="true">Manchester University NHS Trust</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-calendar text-muted-foreground"></i>
+                                        <span data-mock="true">Tomorrow, 14:00</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-clock text-muted-foreground"></i>
+                                        <span data-mock="true">45 minutes duration</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-users text-muted-foreground"></i>
+                                        <span data-mock="true">Panel of 3 interviewers</span>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-4 bg-primary text-primary-foreground py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
+                                    Final Prep Session
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: InterviewPreparation -->
+
+        <!-- @COMPONENT: ProfileCreationWizard -->
+        <section class="py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-foreground mb-4">Complete Your NHS Profile</h2>
+                        <p class="text-muted-foreground">Help us match you with the perfect healthcare opportunities</p>
+                    </div>
+
+                    <!-- Progress Steps -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between relative">
+                            <div class="absolute top-4 left-0 w-full h-0.5 bg-muted"></div>
+                            <div class="absolute top-4 left-0 h-0.5 bg-primary" style="width: 60%"></div>
+                            
+                            <div class="flex flex-col items-center relative bg-background">
+                                <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center mb-2">
+                                    <i class="fas fa-check text-primary-foreground text-sm"></i>
+                                </div>
+                                <span class="text-xs font-medium text-primary">Basic Info</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center relative bg-background">
+                                <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center mb-2">
+                                    <i class="fas fa-check text-primary-foreground text-sm"></i>
+                                </div>
+                                <span class="text-xs font-medium text-primary">Qualifications</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center relative bg-background">
+                                <div class="h-8 w-8 rounded-full bg-secondary flex items-center justify-center mb-2">
+                                    <span class="text-secondary-foreground text-sm font-bold">3</span>
+                                </div>
+                                <span class="text-xs font-medium text-secondary">Experience</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center relative bg-background">
+                                <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center mb-2">
+                                    <span class="text-muted-foreground text-sm font-bold">4</span>
+                                </div>
+                                <span class="text-xs text-muted-foreground">STAR Examples</span>
+                            </div>
+                            
+                            <div class="flex flex-col items-center relative bg-background">
+                                <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center mb-2">
+                                    <span class="text-muted-foreground text-sm font-bold">5</span>
+                                </div>
+                                <span class="text-xs text-muted-foreground">NHS Values</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Step: Professional Experience -->
+                    <div class="bg-card p-8 rounded-lg border border-border">
+                        <h3 class="text-xl font-semibold text-foreground mb-6">Professional Experience & Specialties</h3>
+                        
+                        <div class="space-y-6">
+                            <!-- Current Role -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Current Job Title</label>
+                                    <input type="text" placeholder="e.g. Staff Nurse, Senior Physiotherapist" 
+                                        class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring" data-mock="true">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground mb-2">Current NHS Band</label>
+                                    <select class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring" data-mock="true">
+                                        <option>Select Band</option>
+                                        <option>Band 4</option>
+                                        <option>Band 5</option>
+                                        <option selected>Band 6</option>
+                                        <option>Band 7</option>
+                                        <option>Band 8a</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Healthcare Registration Numbers -->
+                            <div>
+                                <h4 class="font-medium text-foreground mb-3">Professional Registration</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-foreground mb-2">Registration Body</label>
+                                        <select class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring" data-mock="true">
+                                            <option>Select Registration Body</option>
+                                            <option selected>NMC (Nursing & Midwifery Council)</option>
+                                            <option>GMC (General Medical Council)</option>
+                                            <option>HCPC (Health & Care Professions Council)</option>
+                                            <option>GPhC (General Pharmaceutical Council)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-foreground mb-2">Registration Number</label>
+                                        <input type="text" placeholder="e.g. 18G0123E" 
+                                            class="w-full p-3 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring" data-mock="true">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Specialties -->
+                            <div>
+                                <h4 class="font-medium text-foreground mb-3">Clinical Specialties & Experience</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Emergency Medicine</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">5+ years</div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Critical Care</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">3+ years</div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Trauma Care</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">2+ years</div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Pediatric Care</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">1+ years</div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" checked data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Mentoring</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">2+ years</div>
+                                        </div>
+                                    </label>
+                                    
+                                    <label class="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/50 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <div class="flex-1">
+                                            <span class="text-sm font-medium text-foreground">Research</span>
+                                            <div class="text-xs text-muted-foreground" data-mock="true">1+ years</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Document Upload -->
+                            <div>
+                                <h4 class="font-medium text-foreground mb-3">Upload Certificates & Documents</h4>
+                                <div class="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer" data-implementation="Use FileUpload component here">
+                                    <i class="fas fa-cloud-upload-alt text-3xl text-muted-foreground mb-3"></i>
+                                    <p class="text-sm font-medium text-foreground mb-1">Drag and drop your files here</p>
+                                    <p class="text-xs text-muted-foreground mb-3">or click to browse (PDF, JPG, PNG up to 10MB)</p>
+                                    <button class="text-primary text-sm font-medium hover:underline">Choose Files</button>
+                                </div>
+                                
+                                <!-- Uploaded Files Preview -->
+                                <div class="mt-4 space-y-2">
+                                    <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-file-pdf text-red-500"></i>
+                                            <span class="text-sm text-foreground" data-mock="true">NMC_Registration_Certificate.pdf</span>
+                                        </div>
+                                        <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="fas fa-file-pdf text-red-500"></i>
+                                            <span class="text-sm text-foreground" data-mock="true">DBS_Certificate_2024.pdf</span>
+                                        </div>
+                                        <button class="text-muted-foreground hover:text-foreground transition-colors">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between pt-6">
+                                <button class="text-muted-foreground border border-border px-6 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+                                    <i class="fas fa-arrow-left mr-2"></i>Previous Step
+                                </button>
+                                <button class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                                    Continue to STAR Examples <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: ProfileCreationWizard -->
+
+        <!-- @COMPONENT: ApplicationTrackingDashboard -->
+        <section id="applications" class="bg-muted/30 py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-foreground mb-2">Application Dashboard</h2>
+                            <p class="text-muted-foreground">Track your NHS job applications and interviews</p>
+                        </div>
+                        <button class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>New Application
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kanban Board Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Draft Applications -->
+                    <div class="bg-card rounded-lg border border-border">
+                        <div class="p-4 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-foreground">Draft</h3>
+                                <span class="bg-muted text-muted-foreground px-2 py-1 rounded-full text-xs" data-mock="true">2</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <!-- @MAP: draftApplications.map(app => ( -->
+                            <div class="p-4 border border-border rounded-lg cursor-pointer hover:shadow-md transition-shadow">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 5 Staff Nurse</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">Leeds Teaching Hospitals</p>
+                                <div class="text-xs text-muted-foreground mb-3" data-mock="true">Closes in 5 days</div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="h-2 flex-1 bg-muted rounded-full">
+                                        <div class="h-2 bg-secondary rounded-full" style="width: 70%"></div>
+                                    </div>
+                                    <span class="text-xs text-muted-foreground" data-mock="true">70%</span>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+
+                    <!-- Applied -->
+                    <div class="bg-card rounded-lg border border-border">
+                        <div class="p-4 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-foreground">Applied</h3>
+                                <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs" data-mock="true">5</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div class="p-4 border border-border rounded-lg">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 6 Emergency Nurse</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">Manchester University NHS Trust</p>
+                                <div class="text-xs text-muted-foreground mb-2" data-mock="true">Applied 3 days ago</div>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">Under Review</span>
+                            </div>
+                            
+                            <div class="p-4 border border-border rounded-lg">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 7 Clinical Lead</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">Royal Free NHS Trust</p>
+                                <div class="text-xs text-muted-foreground mb-2" data-mock="true">Applied 1 week ago</div>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Shortlisting</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interview Stage -->
+                    <div class="bg-card rounded-lg border border-border">
+                        <div class="p-4 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-foreground">Interview</h3>
+                                <span class="bg-secondary/10 text-secondary px-2 py-1 rounded-full text-xs" data-mock="true">3</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div class="p-4 border border-secondary/20 bg-secondary/5 rounded-lg">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 6 Staff Nurse</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">Birmingham Children's Hospital</p>
+                                <div class="text-xs text-secondary mb-2 font-medium" data-mock="true">Interview: Tomorrow 2:00 PM</div>
+                                <button class="text-secondary text-xs font-medium hover:underline">Prepare Now</button>
+                            </div>
+                            
+                            <div class="p-4 border border-border rounded-lg">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 5 Theatre Nurse</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">Oxford University Hospitals</p>
+                                <div class="text-xs text-muted-foreground mb-2" data-mock="true">Interview: Next Friday</div>
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Offered/Completed -->
+                    <div class="bg-card rounded-lg border border-border">
+                        <div class="p-4 border-b border-border">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold text-foreground">Offers</h3>
+                                <span class="bg-accent/10 text-accent px-2 py-1 rounded-full text-xs" data-mock="true">2</span>
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <div class="p-4 border border-accent/20 bg-accent/5 rounded-lg">
+                                <h4 class="font-medium text-foreground mb-2" data-mock="true">Band 6 Emergency Nurse</h4>
+                                <p class="text-sm text-muted-foreground mb-2" data-mock="true">St. Bartholomew's Hospital</p>
+                                <div class="text-xs text-accent mb-3 font-medium" data-mock="true">Offer received! Respond by Friday</div>
+                                <div class="flex space-x-2">
+                                    <button class="bg-accent text-accent-foreground px-3 py-1 rounded text-xs font-medium">Accept</button>
+                                    <button class="border border-border px-3 py-1 rounded text-xs text-muted-foreground">Decline</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Insights -->
+                <div class="mt-8 bg-card p-6 rounded-lg border border-border">
+                    <h3 class="text-lg font-semibold text-foreground mb-4">Application Insights</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary" data-mock="true">67%</div>
+                            <div class="text-sm text-muted-foreground">Interview Rate</div>
+                            <div class="text-xs text-secondary mt-1">Above average</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-secondary" data-mock="true">12</div>
+                            <div class="text-sm text-muted-foreground">Days Average Response</div>
+                            <div class="text-xs text-accent mt-1">Faster than typical</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-accent" data-mock="true">£36K</div>
+                            <div class="text-sm text-muted-foreground">Average Salary Offered</div>
+                            <div class="text-xs text-primary mt-1">Market rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: ApplicationTrackingDashboard -->
+
+        <!-- @COMPONENT: STARExampleBuilder -->
+        <section class="py-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h2 class="text-2xl font-bold text-foreground mb-4">STAR Example Builder</h2>
+                        <p class="text-muted-foreground">Create compelling examples that demonstrate NHS values and clinical excellence</p>
+                    </div>
+
+                    <div class="bg-card p-8 rounded-lg border border-border">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-foreground mb-2">New STAR Example</h3>
+                            <p class="text-sm text-muted-foreground">Follow the guided prompts to structure your experience using the STAR methodology</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <!-- Situation -->
+                            <div>
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                                        <span class="text-primary-foreground text-sm font-bold">S</span>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-foreground">Situation</h4>
+                                    <div class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">Set the context</div>
+                                </div>
+                                <div class="ml-11">
+                                    <textarea 
+                                        rows="3" 
+                                        placeholder="Describe the situation or challenge you faced. Include relevant background information about the clinical setting, patient, or circumstance..."
+                                        class="w-full p-4 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring resize-none"
+                                        data-mock="true"></textarea>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <p class="text-xs text-muted-foreground">💡 Tip: Be specific about the healthcare setting and context</p>
+                                        <span class="text-xs text-muted-foreground" data-mock="true">0/150 words</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Task -->
+                            <div>
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">
+                                        <span class="text-secondary-foreground text-sm font-bold">T</span>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-foreground">Task</h4>
+                                    <div class="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full">Your responsibility</div>
+                                </div>
+                                <div class="ml-11">
+                                    <textarea 
+                                        rows="3" 
+                                        placeholder="What was your specific responsibility or what needed to be accomplished? Focus on your role and objectives..."
+                                        class="w-full p-4 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring resize-none"
+                                        data-mock="true"></textarea>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <p class="text-xs text-muted-foreground">💡 Tip: Highlight your accountability and patient safety considerations</p>
+                                        <span class="text-xs text-muted-foreground" data-mock="true">0/100 words</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action -->
+                            <div>
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                                        <span class="text-accent-foreground text-sm font-bold">A</span>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-foreground">Action</h4>
+                                    <div class="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full">What you did</div>
+                                </div>
+                                <div class="ml-11">
+                                    <textarea 
+                                        rows="4" 
+                                        placeholder="Detail the specific actions you took. Include clinical interventions, communication strategies, collaboration with colleagues..."
+                                        class="w-full p-4 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring resize-none"
+                                        data-mock="true"></textarea>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <p class="text-xs text-muted-foreground">💡 Tip: Demonstrate NHS values through your actions</p>
+                                        <span class="text-xs text-muted-foreground" data-mock="true">0/200 words</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Result -->
+                            <div>
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">R</span>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-foreground">Result</h4>
+                                    <div class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">The outcome</div>
+                                </div>
+                                <div class="ml-11">
+                                    <textarea 
+                                        rows="3" 
+                                        placeholder="What was the outcome? Include measurable results, patient outcomes, feedback received, or lessons learned..."
+                                        class="w-full p-4 border border-border rounded-lg bg-input focus:ring-2 focus:ring-ring resize-none"
+                                        data-mock="true"></textarea>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <p class="text-xs text-muted-foreground">💡 Tip: Quantify the impact where possible</p>
+                                        <span class="text-xs text-muted-foreground" data-mock="true">0/100 words</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NHS Values Mapping -->
+                            <div class="bg-muted/50 p-6 rounded-lg">
+                                <h4 class="font-medium text-foreground mb-3">NHS Values Demonstrated</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Working together for patients</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Respect and dignity</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Commitment to quality of care</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Compassion</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Improving lives</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" class="rounded border-border text-primary focus:ring-primary" data-mock="true">
+                                        <span class="text-sm">Everyone counts</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <button class="text-muted-foreground border border-border px-6 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+                                    Save as Draft
+                                </button>
+                                <button class="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                                    <i class="fas fa-magic mr-2"></i>Enhance with AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- @END_COMPONENT: STARExampleBuilder -->
+
+    </main>
+
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-card border-t border-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                            <i class="fas fa-heartbeat text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-foreground">HealthHire Portal</h3>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-4">Your complete NHS career toolkit - from profile to offer.</p>
+                    <div class="flex space-x-4">
+                        <button class="text-muted-foreground hover:text-primary transition-colors">
+                            <i class="fab fa-linkedin text-lg"></i>
+                        </button>
+                        <button class="text-muted-foreground hover:text-primary transition-colors">
+                            <i class="fab fa-twitter text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-foreground mb-4">Platform</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-primary transition-colors">Job Search</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">AI Documents</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Interview Prep</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Application Tracking</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-foreground mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-primary transition-colors">NHS Bands Guide</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Visa Requirements</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Registration Support</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Career Pathways</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold text-foreground mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Contact Support</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-border pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-sm text-muted-foreground">© 2024 HealthHire Portal. All rights reserved.</p>
+                    <p class="text-xs text-muted-foreground mt-2 md:mt-0">Designed for NHS healthcare professionals</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        // TODO: Implement business logic, API calls, or state management
+        
+        (function() {
+            // Tab navigation functionality
+            const tabLinks = document.querySelectorAll('nav a[href^="#"]');
+            
+            function updateActiveTab() {
+                const currentHash = window.location.hash || '#dashboard';
+                tabLinks.forEach(link => {
+                    if (link.getAttribute('href') === currentHash) {
+                        link.classList.add('tab-active', 'text-primary');
+                        link.classList.remove('text-muted-foreground');
+                    } else {
+                        link.classList.remove('tab-active', 'text-primary');
+                        link.classList.add('text-muted-foreground');
+                    }
+                });
+            }
+            
+            // Initialize tab state
+            updateActiveTab();
+            
+            // Handle tab clicks
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetHash = this.getAttribute('href');
+                    window.location.hash = targetHash;
+                    updateActiveTab();
+                    
+                    // Smooth scroll to section
+                    const targetSection = document.querySelector(targetHash);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Handle hash changes
+            window.addEventListener('hashchange', updateActiveTab);
+
+            // Mobile menu toggle (placeholder)
+            const mobileMenuBtn = document.querySelector('[data-mobile-menu]');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    // TODO: Implement mobile menu toggle
+                    console.log('Mobile menu toggle clicked');
+                });
+            }
+
+            // File upload drag and drop visual feedback
+            const uploadZones = document.querySelectorAll('[data-implementation*="FileUpload"]');
+            uploadZones.forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('border-primary', 'bg-primary/5');
+                });
+                
+                zone.addEventListener('dragleave', function() {
+                    this.classList.remove('border-primary', 'bg-primary/5');
+                });
+                
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('border-primary', 'bg-primary/5');
+                    // TODO: Handle file upload
+                    console.log('Files dropped');
+                });
+            });
+
+            // Form validation feedback
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    // TODO: Implement validation logic
+                    if (this.value.trim() === '') {
+                        this.classList.add('border-destructive');
+                    } else {
+                        this.classList.remove('border-destructive');
+                        this.classList.add('border-primary');
+                    }
+                });
+                
+                input.addEventListener('focus', function() {
+                    this.classList.remove('border-destructive', 'border-primary');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

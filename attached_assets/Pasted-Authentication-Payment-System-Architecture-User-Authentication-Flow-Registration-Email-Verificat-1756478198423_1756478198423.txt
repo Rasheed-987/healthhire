@@ -1,0 +1,176 @@
+Authentication & Payment System Architecture
+User Authentication Flow
+Registration → Email Verification → Profile Setup → Payment Gate → Full Access
+Authentication Implementation:
+
+Auth Provider: Use Clerk, Auth0, or Supabase Auth for robust user management
+Social Login: Google, LinkedIn (healthcare professional friendly)
+Email/Password: Standard option with strong password requirements
+Session Management: JWT tokens with refresh capability
+Email Verification: Required before any platform access
+
+Payment Integration (Stripe)
+Free vs Paid Access Model:
+FREE TIER (Limited Preview):
+✅ Create basic profile (name, email, location)
+✅ Browse 5 jobs per day
+✅ View sample Supporting Information/CV templates
+❌ No AI generation
+❌ No document downloads
+❌ No interview practice
+❌ No job tracking
+
+PAID TIER (£70 one-time):
+✅ Full profile with unlimited complexity
+✅ Unlimited job searching and matching
+✅ AI document generation (CVs, Supporting Info)
+✅ Interview practice with feedback
+✅ Job tracking dashboard
+✅ Resources hub access
+✅ Q&A generation
+Stripe Implementation:
+
+Product Setup: Single product "HealthHire Portal Access" - £70 one-time payment
+Payment Flow: Stripe Checkout (hosted) for simplicity and security
+Webhook Handling: Process payment success and upgrade user account
+Payment Methods: Card payments, Google Pay, Apple Pay
+VAT Handling: UK VAT compliance (20% where applicable)
+
+Technical Implementation:
+javascript// User Database Schema
+users: {
+  id: string,
+  email: string,
+  subscription_status: 'free' | 'paid' | 'expired',
+  stripe_customer_id: string,
+  payment_date: timestamp,
+  features_unlocked: string[], // granular feature control
+  free_tier_limits: {
+    jobs_viewed_today: number,
+    last_reset: timestamp
+  }
+}
+Authentication Middleware & Route Protection:
+
+Free Routes: Landing, pricing, limited job browse, sample templates
+Auth Required: Profile creation, saving searches, any account data
+Paid Routes: AI generation, interview practice, full job access, tracking
+Admin Routes: Analytics dashboard, user management, content CMS
+
+User Journey Implementation:
+1. Landing Page (No Auth Required)
+- Hero section with value proposition
+- "Start Free" CTA → Registration
+- "See Sample CV/Supporting Info" → Preview templates
+- Pricing information (£70 one-time)
+2. Registration Flow
+Step 1: Email/Password + Social options
+Step 2: Email verification (required)
+Step 3: Basic profile (name, profession, location)
+Step 4: Free tier onboarding tour
+3. Free Tier Experience
+Dashboard shows:
+- 7 sections (same layout) but with upgrade prompts
+- "5 jobs remaining today" counter
+- "Upgrade to unlock" overlays on premium features
+- Sample/demo content to show value
+4. Upgrade Flow (Payment Gate)
+Trigger points:
+- User hits daily job limit
+- Tries to generate documents
+- Attempts interview practice
+- Clicks premium features
+
+Payment flow:
+- Stripe Checkout with clear pricing
+- Success → Webhook updates user status
+- Redirect to welcome/onboarding for paid features
+5. Post-Payment Experience
+- Success page with next steps
+- Email confirmation with receipt
+- Full platform unlock
+- Guided tour of premium features
+Technical Stack for Auth/Payments:
+Frontend (React/Next.js):
+javascript// Auth Context
+const AuthContext = {
+  user: User | null,
+  isLoading: boolean,
+  isPaid: boolean,
+  login: (credentials) => Promise,
+  logout: () => void,
+  checkFeatureAccess: (feature) => boolean
+}
+
+// Payment Component
+<StripeCheckout 
+  mode="payment"
+  amount={7000} // £70.00 in pence
+  successUrl="/welcome"
+  cancelUrl="/pricing"
+/>
+Backend API Routes:
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/verify-email
+GET  /api/auth/me
+POST /api/payments/create-checkout
+POST /api/webhooks/stripe
+GET  /api/user/subscription-status
+Environment Variables:
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+AUTH_SECRET=random_secret
+DATABASE_URL=postgresql://...
+Free Tier Limitations Logic:
+Job Viewing Limits:
+javascript// Reset counter daily
+const canViewJob = (user) => {
+  if (user.subscription_status === 'paid') return true;
+  
+  const today = new Date().toDateString();
+  const lastReset = new Date(user.free_tier_limits.last_reset).toDateString();
+  
+  if (today !== lastReset) {
+    // Reset daily counter
+    user.free_tier_limits.jobs_viewed_today = 0;
+    user.free_tier_limits.last_reset = new Date();
+  }
+  
+  return user.free_tier_limits.jobs_viewed_today < 5;
+};
+Feature Access Control:
+javascriptconst featureGates = {
+  'ai_generation': 'paid',
+  'interview_practice': 'paid', 
+  'job_tracking': 'paid',
+  'unlimited_search': 'paid',
+  'basic_profile': 'free',
+  'limited_job_view': 'free'
+};
+Security Considerations:
+
+PCI Compliance: Use Stripe Checkout (PCI compliant by default)
+Data Protection: Encrypt sensitive user data, GDPR compliance
+Rate Limiting: Prevent abuse of free tier and API endpoints
+Webhook Security: Verify Stripe webhook signatures
+Session Security: Secure JWT handling, auto-logout on suspicious activity
+
+Testing Strategy:
+
+Stripe Test Mode: Use test cards for development
+Payment Flows: Test success, failure, and webhook scenarios
+Free Tier Limits: Verify daily resets and upgrade prompts
+Auth Edge Cases: Expired sessions, email verification, password reset
+Compliance: GDPR-compliant data handling with granular consent
+Security: Encrypt sensitive documents (DBS certificates, registration letters)
+Accuracy: Fact-checking for medical qualifications and registration numbers
+Localization: UK spelling, NHS terminology, healthcare acronyms
+
+Performance Considerations:
+
+Large Document Processing: Optimize PDF parsing for certificates/CVs
+Real-time Job Updates: Efficient caching of NHS Jobs data
+Concurrent AI Requests: Queue management for document generation
+Mobile Responsiveness: Touch-friendly interfaces for on-the-go job searching

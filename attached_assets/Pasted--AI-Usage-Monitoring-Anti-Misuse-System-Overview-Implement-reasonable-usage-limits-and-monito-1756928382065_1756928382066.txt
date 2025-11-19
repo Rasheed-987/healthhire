@@ -1,0 +1,624 @@
+# AI Usage Monitoring & Anti-Misuse System
+
+## Overview
+Implement reasonable usage limits and monitoring for AI features (Interview Practice, Q&A Generator, Henry the Helper) to prevent misuse while maintaining the "unlimited applications" promise for legitimate users.
+
+## Core Requirements
+
+### Usage Limits Strategy
+- **Legitimate Users**: Should never hit limits during normal usage
+- **Misuse Prevention**: Detect and prevent abuse, spam, or commercial exploitation
+- **Grace Period**: Warnings before restrictions
+- **Appeal Process**: Easy way to contest false positives
+
+## Implementation Structure
+
+### 1. Database Schema
+
+```sql
+-- User AI Usage Tracking
+CREATE TABLE ai_usage_tracking (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    feature_type VARCHAR(50), -- 'interview_practice', 'qa_generator', 'henry_feedback'
+    usage_date DATE,
+    hourly_count INTEGER DEFAULT 0,
+    daily_count INTEGER DEFAULT 0,
+    weekly_count INTEGER DEFAULT 0,
+    monthly_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, feature_type, usage_date)
+);
+
+-- Usage Violations & Warnings
+CREATE TABLE usage_violations (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    violation_type VARCHAR(100), -- 'excessive_usage', 'rapid_requests', 'suspicious_pattern'
+    feature_type VARCHAR(50),
+    violation_details JSON,
+    warning_sent BOOLEAN DEFAULT FALSE,
+    restriction_applied BOOLEAN DEFAULT FALSE,
+    resolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User Restrictions
+CREATE TABLE user_restrictions (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    feature_type VARCHAR(50),
+    restriction_type VARCHAR(50), -- 'rate_limit', 'temporary_ban', 'under_review'
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP,
+    reason TEXT,
+    can_appeal BOOLEAN DEFAULT TRUE,
+    appeal_submitted BOOLEAN DEFAULT FALSE
+);
+
+-- Appeals
+CREATE TABLE usage_appeals (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    restriction_id INTEGER REFERENCES user_restrictions(id),
+    appeal_reason TEXT,
+    status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+    admin_response TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP
+);
+```
+
+### 2. Usage Limits Configuration
+
+```javascript
+// config/usageLimits.js
+const USAGE_LIMITS = {
+    // Interview Practice Limits
+    interview_practice: {
+        hourly: 10,      // 10 practice sessions per hour
+        daily: 50,       // 50 sessions per day
+        weekly: 200,     // 200 sessions per week
+        monthly: 500     // 500 sessions per month
+    },
+    
+    // Q&A Generator Limits
+    qa_generator: {
+        hourly: 5,       // 5 Q&A generations per hour
+        daily: 15,       // 15 generations per day
+        weekly: 70,      // 70 generations per week
+        monthly: 200     // 200 generations per month
+    },
+    
+    // Henry Feedback Limits (part of interview practice)
+    henry_feedback: {
+        hourly: 10,      // 10 feedback requests per hour
+        daily: 50,       // 50 feedback requests per day
+        weekly: 200,     // 200 requests per week
+        monthly: 500     // 500 requests per month
+    }
+};
+
+// Warning thresholds (percentage of limit)
+const WARNING_THRESHOLDS = {
+    first_warning: 0.8,    // 80% of limit
+    final_warning: 0.95,   // 95% of limit
+    restriction: 1.0       // 100% of limit
+};
+
+// Suspicious pattern detection
+const SUSPICIOUS_PATTERNS = {
+    rapid_requests: {
+        requests_per_minute: 10,  // More than 10 requests per minute
+        duration_minutes: 5       // Sustained for 5 minutes
+    },
+    identical_content: {
+        threshold: 5              // Same content submitted 5+ times
+    },
+    off_hours_usage: {
+        requests_per_hour: 20,    // 20+ requests between 2-6 AM
+        time_range: [2, 6]        // 2 AM to 6 AM
+    }
+};
+```
+
+### 3. Usage Monitoring Middleware
+
+```javascript
+// middleware/usageMonitoring.js
+const UsageMonitor = {
+    
+    async trackUsage(userId, featureType) {
+        const today = new Date().toISOString().split('T')[0];
+        const currentHour = new Date().getHours();
+        
+        // Get or create usage record
+        let usage = await db.query(`
+            SELECT * FROM ai_usage_tracking 
+            WHERE user_id = ? AND feature_type = ? AND usage_date = ?
+        `, [userId, featureType, today]);
+        
+        if (!usage.length) {
+            usage = await db.query(`
+                INSERT INTO ai_usage_tracking (user_id, feature_type, usage_date)
+                VALUES (?, ?, ?) RETURNING *
+            `, [userId, featureType, today]);
+        }
+        
+        // Increment counters
+        await db.query(`
+            UPDATE ai_usage_tracking SET 
+                hourly_count = CASE 
+                    WHEN DATE_PART('hour', updated_at) = ? THEN hourly_count + 1 
+                    ELSE 1 
+                END,
+                daily_count = daily_count + 1,
+                weekly_count = weekly_count + 1,
+                monthly_count = monthly_count + 1,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ? AND feature_type = ? AND usage_date = ?
+        `, [currentHour, userId, featureType, today]);
+        
+        // Check for violations
+        await this.checkViolations(userId, featureType);
+    },
+    
+    async checkViolations(userId, featureType) {
+        const usage = await this.getCurrentUsage(userId, featureType);
+        const limits = USAGE_LIMITS[featureType];
+        
+        const violations = [];
+        
+        // Check each time period
+        ['hourly', 'daily', 'weekly', 'monthly'].forEach(period => {
+            const currentUsage = usage[`${period}_count`];
+            const limit = limits[period];
+            const percentage = currentUsage / limit;
+            
+            if (percentage >= WARNING_THRESHOLDS.restriction) {
+                violations.push({
+                    type: 'limit_exceeded',
+                    period,
+                    current: currentUsage,
+                    limit,
+                    percentage
+                });
+            } else if (percentage >= WARNING_THRESHOLDS.final_warning) {
+                violations.push({
+                    type: 'final_warning',
+                    period,
+                    current: currentUsage,
+                    limit,
+                    percentage
+                });
+            } else if (percentage >= WARNING_THRESHOLDS.first_warning) {
+                violations.push({
+                    type: 'first_warning',
+                    period,
+                    current: currentUsage,
+                    limit,
+                    percentage
+                });
+            }
+        });
+        
+        // Process violations
+        for (const violation of violations) {
+            await this.handleViolation(userId, featureType, violation);
+        }
+        
+        // Check for suspicious patterns
+        await this.checkSuspiciousPatterns(userId, featureType);
+        
+        return violations;
+    },
+    
+    async handleViolation(userId, featureType, violation) {
+        // Record violation
+        await db.query(`
+            INSERT INTO usage_violations 
+            (user_id, violation_type, feature_type, violation_details)
+            VALUES (?, ?, ?, ?)
+        `, [userId, violation.type, featureType, JSON.stringify(violation)]);
+        
+        switch (violation.type) {
+            case 'first_warning':
+                await this.sendWarningEmail(userId, featureType, violation, 'first');
+                break;
+            case 'final_warning':
+                await this.sendWarningEmail(userId, featureType, violation, 'final');
+                break;
+            case 'limit_exceeded':
+                await this.applyRestriction(userId, featureType, violation);
+                break;
+        }
+    },
+    
+    async applyRestriction(userId, featureType, violation) {
+        const restrictionEnd = new Date();
+        
+        // Determine restriction duration based on violation severity
+        if (violation.period === 'hourly') {
+            restrictionEnd.setHours(restrictionEnd.getHours() + 1);
+        } else if (violation.period === 'daily') {
+            restrictionEnd.setDate(restrictionEnd.getDate() + 1);
+        } else {
+            restrictionEnd.setDate(restrictionEnd.getDate() + 3); // 3-day restriction
+        }
+        
+        await db.query(`
+            INSERT INTO user_restrictions 
+            (user_id, feature_type, restriction_type, end_time, reason)
+            VALUES (?, ?, 'rate_limit', ?, ?)
+        `, [userId, featureType, restrictionEnd, `Exceeded ${violation.period} usage limit`]);
+        
+        await this.sendRestrictionEmail(userId, featureType, violation);
+    }
+};
+```
+
+### 4. API Route Protection
+
+```javascript
+// middleware/rateLimitCheck.js
+const checkUsageRestrictions = async (req, res, next) => {
+    const userId = req.user.id;
+    const featureType = req.path.includes('/interview/') ? 'interview_practice' :
+                       req.path.includes('/qa/') ? 'qa_generator' : 'henry_feedback';
+    
+    try {
+        // Check for active restrictions
+        const restrictions = await db.query(`
+            SELECT * FROM user_restrictions 
+            WHERE user_id = ? AND feature_type = ? 
+            AND (end_time IS NULL OR end_time > CURRENT_TIMESTAMP)
+            AND restriction_type IN ('rate_limit', 'temporary_ban')
+        `, [userId, featureType]);
+        
+        if (restrictions.length > 0) {
+            const restriction = restrictions[0];
+            return res.status(429).json({
+                error: 'Usage Restricted',
+                message: 'Our servers have detected unusual usage patterns on your account.',
+                details: {
+                    restriction_type: restriction.restriction_type,
+                    reason: restriction.reason,
+                    end_time: restriction.end_time,
+                    can_appeal: restriction.can_appeal
+                },
+                next_steps: [
+                    'If you believe this is an error, please contact our support team',
+                    'You can submit an appeal through your account settings',
+                    'Normal access will resume automatically after the restriction period'
+                ],
+                support_contact: 'support@yourplatform.com'
+            });
+        }
+        
+        // Track usage for this request
+        await UsageMonitor.trackUsage(userId, featureType);
+        
+        // Check if this request would cause violations
+        const violations = await UsageMonitor.checkViolations(userId, featureType);
+        
+        // Add usage info to response headers for transparency
+        const currentUsage = await UsageMonitor.getCurrentUsage(userId, featureType);
+        const limits = USAGE_LIMITS[featureType];
+        
+        res.setHeader('X-Usage-Daily', `${currentUsage.daily_count}/${limits.daily}`);
+        res.setHeader('X-Usage-Hourly', `${currentUsage.hourly_count}/${limits.hourly}`);
+        
+        // If severe violations, block the request
+        const severeViolations = violations.filter(v => v.type === 'limit_exceeded');
+        if (severeViolations.length > 0) {
+            return res.status(429).json({
+                error: 'Usage Limit Exceeded',
+                message: 'You have exceeded the usage limit for this feature.',
+                violations: severeViolations,
+                limits: limits,
+                current_usage: currentUsage,
+                support_contact: 'support@yourplatform.com'
+            });
+        }
+        
+        next();
+        
+    } catch (error) {
+        console.error('Usage monitoring error:', error);
+        // Don't block requests if monitoring fails
+        next();
+    }
+};
+```
+
+### 5. Email Notifications
+
+```javascript
+// services/emailNotifications.js
+const EmailNotifications = {
+    
+    async sendWarningEmail(userId, featureType, violation, warningType) {
+        const user = await getUserById(userId);
+        const limits = USAGE_LIMITS[featureType];
+        
+        const subject = warningType === 'first' 
+            ? 'Usage Reminder - AI Features'
+            : 'Final Warning - AI Feature Usage';
+            
+        const template = warningType === 'first' 
+            ? 'usage_first_warning' 
+            : 'usage_final_warning';
+        
+        await sendEmail(user.email, subject, template, {
+            user_name: user.name,
+            feature_name: this.getFeatureName(featureType),
+            current_usage: violation.current,
+            usage_limit: violation.limit,
+            period: violation.period,
+            percentage: Math.round(violation.percentage * 100),
+            limits: limits,
+            support_email: 'support@yourplatform.com'
+        });
+    },
+    
+    async sendRestrictionEmail(userId, featureType, violation) {
+        const user = await getUserById(userId);
+        
+        await sendEmail(user.email, 'Account Restriction Applied', 'usage_restriction', {
+            user_name: user.name,
+            feature_name: this.getFeatureName(featureType),
+            violation_details: violation,
+            appeal_link: `${process.env.APP_URL}/account/appeals`,
+            support_email: 'support@yourplatform.com'
+        });
+    },
+    
+    getFeatureName(featureType) {
+        const names = {
+            interview_practice: 'Interview Practice',
+            qa_generator: 'Q&A Generator',
+            henry_feedback: 'Henry the Helper'
+        };
+        return names[featureType] || featureType;
+    }
+};
+```
+
+### 6. Frontend Usage Display Component
+
+```javascript
+// components/UsageIndicator.jsx
+const UsageIndicator = ({ featureType }) => {
+    const [usage, setUsage] = useState(null);
+    const [showDetails, setShowDetails] = useState(false);
+    
+    useEffect(() => {
+        fetchUsage();
+    }, [featureType]);
+    
+    const fetchUsage = async () => {
+        try {
+            const response = await fetch(`/api/usage/${featureType}`);
+            const data = await response.json();
+            setUsage(data);
+        } catch (error) {
+            console.error('Failed to fetch usage:', error);
+        }
+    };
+    
+    if (!usage) return null;
+    
+    const limits = USAGE_LIMITS[featureType];
+    const dailyPercentage = (usage.daily_count / limits.daily) * 100;
+    
+    const getUsageColor = (percentage) => {
+        if (percentage >= 95) return 'text-red-600';
+        if (percentage >= 80) return 'text-yellow-600';
+        return 'text-green-600';
+    };
+    
+    return (
+        <div className="bg-white border rounded-lg p-4 mb-4">
+            <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                    Daily Usage: {' '}
+                    <span className={getUsageColor(dailyPercentage)}>
+                        {usage.daily_count}/{limits.daily}
+                    </span>
+                </div>
+                <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="text-blue-600 text-sm hover:underline"
+                >
+                    {showDetails ? 'Hide' : 'Show'} Details
+                </button>
+            </div>
+            
+            {/* Progress bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                        dailyPercentage >= 95 ? 'bg-red-500' :
+                        dailyPercentage >= 80 ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min(dailyPercentage, 100)}%` }}
+                />
+            </div>
+            
+            {showDetails && (
+                <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span className="text-gray-600">Hourly:</span> {usage.hourly_count}/{limits.hourly}
+                    </div>
+                    <div>
+                        <span className="text-gray-600">Weekly:</span> {usage.weekly_count}/{limits.weekly}
+                    </div>
+                    <div className="col-span-2">
+                        <span className="text-gray-600">Monthly:</span> {usage.monthly_count}/{limits.monthly}
+                    </div>
+                </div>
+            )}
+            
+            {dailyPercentage >= 80 && (
+                <div className="mt-3 text-sm bg-yellow-50 border border-yellow-200 rounded p-2">
+                    ⚠️ You're approaching the daily usage limit. 
+                    <a href="/help/usage-limits" className="text-blue-600 hover:underline ml-1">
+                        Learn more about usage limits
+                    </a>
+                </div>
+            )}
+        </div>
+    );
+};
+```
+
+### 7. Appeals System
+
+```javascript
+// components/AppealForm.jsx
+const AppealForm = ({ restrictionId }) => {
+    const [appealReason, setAppealReason] = useState('');
+    const [submitted, setSubmitted] = useState(false);
+    
+    const submitAppeal = async () => {
+        try {
+            await fetch('/api/appeals', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    restriction_id: restrictionId,
+                    appeal_reason: appealReason
+                })
+            });
+            setSubmitted(true);
+        } catch (error) {
+            console.error('Appeal submission failed:', error);
+        }
+    };
+    
+    if (submitted) {
+        return (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-semibold text-green-800">Appeal Submitted</h3>
+                <p className="text-green-700 text-sm mt-1">
+                    Our team will review your appeal within 24 hours and contact you via email.
+                </p>
+            </div>
+        );
+    }
+    
+    return (
+        <div className="bg-white border rounded-lg p-4">
+            <h3 className="font-semibold mb-3">Submit an Appeal</h3>
+            <p className="text-gray-600 text-sm mb-4">
+                If you believe this restriction was applied in error, please explain your situation:
+            </p>
+            <textarea
+                className="w-full p-3 border rounded-lg h-32 mb-3"
+                placeholder="Please describe why you believe this restriction is incorrect..."
+                value={appealReason}
+                onChange={(e) => setAppealReason(e.target.value)}
+            />
+            <button
+                onClick={submitAppeal}
+                disabled={appealReason.length < 50}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            >
+                Submit Appeal
+            </button>
+        </div>
+    );
+};
+```
+
+### 8. Admin Dashboard Integration
+
+```javascript
+// admin/UsageMonitoringDashboard.jsx
+const UsageMonitoringDashboard = () => {
+    const [violations, setViolations] = useState([]);
+    const [appeals, setAppeals] = useState([]);
+    
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Usage Monitoring</h2>
+            
+            {/* Recent Violations */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="font-semibold mb-4">Recent Violations</h3>
+                <div className="space-y-3">
+                    {violations.map(violation => (
+                        <ViolationCard key={violation.id} violation={violation} />
+                    ))}
+                </div>
+            </div>
+            
+            {/* Pending Appeals */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="font-semibold mb-4">Pending Appeals</h3>
+                <div className="space-y-3">
+                    {appeals.map(appeal => (
+                        <AppealCard key={appeal.id} appeal={appeal} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+```
+
+## Key Features Summary
+
+### 1. **Reasonable Limits**
+- Hourly/Daily/Weekly/Monthly limits for each AI feature
+- Generous limits that won't affect legitimate users
+- Different limits for different feature types
+
+### 2. **Progressive Warning System**
+- 80% usage: First warning email
+- 95% usage: Final warning email
+- 100% usage: Temporary restriction applied
+
+### 3. **Transparent Communication**
+- Clear messaging about why restrictions exist
+- Usage indicators visible to users
+- Detailed explanation of violation reasons
+
+### 4. **Appeals Process**
+- Easy appeal submission through UI
+- 24-hour review promise
+- Email notifications for appeals
+
+### 5. **Admin Tools**
+- Dashboard for monitoring violations
+- Appeal management system
+- Usage analytics and trends
+
+### 6. **Smart Detection**
+- Suspicious pattern recognition
+- Rapid request detection
+- Off-hours usage monitoring
+
+### Updated Usage Limits Summary
+
+**Interview Preparation Features (doubled):**
+- Interview Practice: 10/hour, 40/day, 200/week, 600/month
+- Q&A Generator: 6/hour, 16/day, 70/week, 240/month  
+- Henry Feedback: 10/hour, 40/day, 200/week, 600/month
+
+**Content Generation Features (3x increase):**
+- Supporting Info Generator: 6/hour, 24/day, 90/week, 240/month
+- Cover Letter Generator: 6/hour, 18/day, 75/week, 210/month
+
+**Document Creation Features:**
+- CV Generator: 3/hour, 9/day, 30/week, 75/month (tripled)
+- Job Duties Generator: 5/hour, 10/day, 40/week, 100/month (5x increase)
+
+**Rationale for Increased Limits:**
+- **Interview Features**: Higher limits support intensive interview preparation
+- **Content Generation**: More generous limits for active job seekers applying to multiple positions
+- **CV Generator**: Allows for more CV variations and iterations
+- **Job Duties Generator**: Balanced increase while still preventing misuse for fabricated experience
+
+These limits now better support legitimate heavy usage while maintaining protection against misuse.

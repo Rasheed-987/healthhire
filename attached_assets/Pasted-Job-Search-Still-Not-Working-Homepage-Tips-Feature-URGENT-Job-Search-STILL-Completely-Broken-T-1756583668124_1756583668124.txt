@@ -1,0 +1,194 @@
+Job Search Still Not Working + Homepage Tips Feature
+🚨 URGENT: Job Search STILL Completely Broken
+The job search feature is still not working at all. Users still cannot:
+
+Search for any jobs (returns no results)
+View job details (buttons don't work)
+See role fit scores (not calculating)
+Access any real NHS job data
+
+This needs to be fixed IMMEDIATELY - the platform is unusable without working job search.
+Please implement the web scraping and job search functionality as outlined in the previous message. Until this works, users cannot use the core features of HealthHire Portal.
+
+NEW FEATURE: Rotating Tips on Homepage Dashboard
+Add a rotating tip section above the main dashboard that shows helpful NHS application advice
+Implementation Requirements:
+Tip Display Box:
+
+Position: Above the 7 section cards on main dashboard
+Style: Attractive banner/card with light background
+Icon: 💡 or similar tip icon
+Rotation: Changes every time user visits or refreshes page
+Dismissible: Users can close it but it returns next session
+
+Tips Database (Use These Exact Tips):
+javascriptconst healthHireTips = [
+  // CV & Supporting Information Tips
+  "💡 Tip: Quantify your achievements - write 'Reduced wait times by 20%' instead of just 'improved efficiency'",
+  
+  "💡 Tip: Avoid jargon in your applications – write in plain English that any panel member can understand",
+  
+  "💡 Tip: Always double-check spelling of Trust names and hospitals - spelling errors can cost you the interview",
+  
+  "💡 Tip: Highlight NHS values (compassion, respect, dignity, commitment, quality, integrity) in your supporting information",
+  
+  "💡 Tip: Keep sentences concise but specific - every word should add value to your application",
+
+  // NHS Values & Person Specification Tips  
+  "💡 Tip: Read the person specification line by line and directly match each point in your response",
+  
+  "💡 Tip: Use the STAR method: Situation, Task, Action, Result - it makes your examples much stronger",
+  
+  "💡 Tip: Show evidence of continuous professional development - mention recent courses and training",
+  
+  "💡 Tip: Always address essential criteria first, then desirable ones - don't leave any gaps",
+  
+  "💡 Tip: Don't just state your skills - evidence them with specific examples and outcomes",
+
+  // Supporting Information Tips
+  "💡 Tip: Write in paragraphs, not bullet points - NHS panels prefer flowing narrative text",
+  
+  "💡 Tip: Keep supporting information around 500-1000 words depending on the role level",
+  
+  "💡 Tip: End with a strong closing statement about your motivation and commitment",
+  
+  "💡 Tip: Use 'I' statements and take ownership - show confidence in your abilities",
+  
+  "💡 Tip: Mention working across MDTs (multidisciplinary teams) - it's essential in NHS roles",
+  
+  "💡 Tip: Show awareness of NHS pressures like workload, waiting lists, and patient safety",
+
+  // Motivation & Career Tips
+  "💡 Tip: Be specific about why you want THIS Trust - research their values and recent achievements",
+  
+  "💡 Tip: Share a personal experience that shaped your healthcare career choice - make it authentic",
+  
+  "💡 Tip: Explain how this role fits your long-term career development plan",
+  
+  "💡 Tip: Stay positive in applications - never criticise previous employers or experiences",
+  
+  "💡 Tip: Demonstrate enthusiasm for NHS training and progression opportunities",
+
+  // Skills & Experience Tips
+  "💡 Tip: Highlight communication skills with both patients and colleagues - it's crucial",
+  
+  "💡 Tip: Mention specific IT systems you've used: EPR, PACS, Lorenzo, SystmOne",
+  
+  "💡 Tip: Evidence teamwork, especially examples of working under pressure",
+  
+  "💡 Tip: Show understanding of safeguarding principles - it's essential for all NHS roles",
+  
+  "💡 Tip: Demonstrate flexibility with shifts and rota changes - NHS values adaptability",
+
+  // Clinical Knowledge Tips
+  "💡 Tip: Reference relevant guidelines: NICE, NMC Code, GMC Good Practice, IR(ME)R",
+  
+  "💡 Tip: Mention any audit, quality improvement, or service improvement involvement",
+  
+  "💡 Tip: Show evidence of documentation accuracy - it's critical for patient safety",
+  
+  "💡 Tip: Demonstrate how you prioritise tasks in busy clinical settings",
+
+  // Interview Preparation Tips
+  "💡 Tip: Research the Trust's values and recent CQC inspection ratings before interviews",
+  
+  "💡 Tip: Prepare STAR answers for NHS values-based questions - practice them aloud",
+  
+  "💡 Tip: Have one strong example ready for teamwork and one for leadership/initiative",
+  
+  "💡 Tip: Be ready for scenario questions: 'What would you do if a patient complained?'",
+
+  // Application Process Tips
+  "💡 Tip: Don't wait until closing date to apply - submit early to avoid system crashes",
+  
+  "💡 Tip: Save copies of your supporting information to adapt for future roles",
+  
+  "💡 Tip: Apply widely - NHS, private sector, agency, and bank positions",
+  
+  "💡 Tip: Always personalise applications - never copy and paste blindly",
+  
+  "💡 Tip: Check visa sponsorship requirements early in your application process",
+
+  // Motivation & Mindset Tips
+  "💡 Tip: Rejection is redirection - learn from feedback and improve your next application",
+  
+  "💡 Tip: Every application is practice - you're sharpening your skills each time",
+  
+  "💡 Tip: Persistence beats perfection - keep applying and improving",
+  
+  "💡 Tip: Request feedback after every rejection - it's fuel for improvement",
+  
+  "💡 Tip: Celebrate small wins like getting shortlisted or reaching interview stage",
+
+  // Practical Tips
+  "💡 Tip: Follow NHS Trusts on LinkedIn to see their values and culture in action",
+  
+  "💡 Tip: Network with current NHS staff online - they can provide insider insights",
+  
+  "💡 Tip: Tailor applications to specific departments (e.g., radiology vs cardiology)",
+  
+  "💡 Tip: Keep your CPD portfolio ready to show at interviews",
+  
+  "💡 Tip: The NHS needs people like you - believe in your ability to succeed"
+];
+Implementation Code:
+javascript// Homepage tip component
+const RotatingTip = () => {
+  const [currentTip, setCurrentTip] = useState('');
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    // Select random tip on component mount
+    const randomTip = healthHireTips[Math.floor(Math.random() * healthHireTips.length)];
+    setCurrentTip(randomTip);
+  }, []);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="rotating-tip mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <span className="text-2xl">💡</span>
+          <p className="text-blue-800 font-medium">{currentTip}</p>
+        </div>
+        <button 
+          onClick={() => setIsVisible(false)}
+          className="text-blue-400 hover:text-blue-600"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Add to main dashboard
+const Dashboard = () => {
+  return (
+    <div className="dashboard">
+      <RotatingTip />  {/* Add this above the section cards */}
+      
+      <div className="section-cards-grid">
+        {/* Your 7 section cards here */}
+      </div>
+    </div>
+  );
+};
+Tip Rotation Logic:
+
+Random selection: Different tip each time user visits homepage
+Session memory: Same tip shown until user leaves and returns
+Dismissible: User can close tip but it returns next session
+Mobile friendly: Responsive design that works on all devices
+
+Visual Design:
+
+Light blue background with darker blue text (NHS colors)
+Lightbulb icon to indicate helpful tip
+Clean typography that's easy to read
+Subtle shadow to make it stand out from main content
+Close button (X) in top right corner
+
+This will provide continuous value to users by showing them expert NHS application advice every time they visit the platform, helping them improve their chances of success while using HealthHire Portal.
+PRIORITY: Fix the job search functionality first, then add the tips feature!

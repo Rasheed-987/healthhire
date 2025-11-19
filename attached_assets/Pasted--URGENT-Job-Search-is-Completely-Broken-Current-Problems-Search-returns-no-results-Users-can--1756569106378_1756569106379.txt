@@ -1,0 +1,287 @@
+🚨 URGENT: Job Search is Completely Broken
+Current Problems:
+
+Search returns no results - Users can't find any jobs when searching
+"View Details" button doesn't work - Job detail pages are broken
+Role Fit Score not calculating - No matching algorithm working
+No real job data - Need to scrape live NHS job boards
+Required Job Data Sources to Scrape
+1. NHS Jobs (Primary Source)
+Website: https://www.jobs.nhs.uk/ What to scrape:
+
+javascript
+const nhsJobsData = {
+  jobTitle: "Band 5 Staff Nurse - Emergency Department",
+  trust: "Manchester University NHS Foundation Trust", 
+  band: "Band 5",
+  location: "Manchester",
+  salary: "£27,055 - £32,934 per annum",
+  contractType: "Permanent",
+  workingPattern: "Full time",
+  closingDate: "23 January 2024",
+  jobReference: "REF123456",
+  description: "Full job description text...",
+  personSpecification: "Essential: RGN qualification...",
+  visaSponsorship: "Visa sponsorship available", // if mentioned
+  applicationUrl: "https://www.jobs.nhs.uk/xi/vacancy/..."
+};
+2. Trac Jobs
+Website: https://www.tracjobs.co.uk/ Focus: NHS and healthcare roles across UK What to scrape: Similar structure to NHS Jobs
+
+3. NHS Scotland Jobs
+Website: https://apply.jobs.scot.nhs.uk/ Focus: Scottish NHS positions What to scrape: Scotland-specific NHS roles with devolved pay scales
+
+4. Additional Sources (Future):
+NHS Wales Jobs
+Northern Ireland Health Jobs
+Private healthcare job boards (if relevant)
+Web Scraping Implementation Required
+Scraping Strategy:
+python
+# Example scraping approach
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def scrape_nhs_jobs():
+    """Scrape NHS Jobs website for latest positions"""
+    
+    base_url = "https://www.jobs.nhs.uk/xi/search_vacancy"
+    
+    # Search parameters
+    params = {
+        'action': 'search',
+        'keyword': '',
+        'location': '',
+        'distanceInMiles': '25',
+        'payband': '',  # Band 2, Band 3, etc.
+        'specialty': '', # Nursing, Medicine, etc.
+    }
+    
+    jobs = []
+    
+    # Scrape search results
+    response = requests.get(base_url, params=params)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Extract job listings
+    job_cards = soup.find_all('div', class_='vacancy-card')
+    
+    for card in job_cards:
+        job = {
+            'title': card.find('h3').text.strip(),
+            'trust': card.find('.trust-name').text.strip(),
+            'location': card.find('.location').text.strip(),
+            'band': extract_band(card.find('.band')),
+            'salary': card.find('.salary').text.strip(),
+            'closing_date': card.find('.closing-date').text.strip(),
+            'job_url': card.find('a')['href'],
+            'scraped_date': datetime.now()
+        }
+        
+        # Scrape detailed job page
+        job_details = scrape_job_details(job['job_url'])
+        job.update(job_details)
+        
+        jobs.append(job)
+    
+    return jobs
+
+def scrape_job_details(job_url):
+    """Get full job description and person specification"""
+    response = requests.get(job_url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    return {
+        'description': soup.find('.job-description').text.strip(),
+        'person_spec': soup.find('.person-specification').text.strip(),
+        'benefits': soup.find('.benefits').text.strip(),
+        'visa_sponsorship': check_visa_sponsorship(soup)
+    }
+Database Schema for Jobs:
+sql
+CREATE TABLE jobs (
+    id SERIAL PRIMARY KEY,
+    job_reference VARCHAR(50) UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    trust VARCHAR(255),
+    location VARCHAR(255),
+    region VARCHAR(100),
+    band VARCHAR(20),
+    salary VARCHAR(100),
+    contract_type VARCHAR(50),
+    working_pattern VARCHAR(100),
+    specialty VARCHAR(100),
+    department VARCHAR(255),
+    closing_date DATE,
+    description TEXT,
+    person_specification TEXT,
+    benefits TEXT,
+    visa_sponsorship BOOLEAN DEFAULT FALSE,
+    external_url VARCHAR(500),
+    source VARCHAR(50), -- 'nhs_jobs', 'trac_jobs', etc.
+    scraped_at TIMESTAMP DEFAULT NOW(),
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Index for fast searching
+CREATE INDEX idx_jobs_search ON jobs(title, location, band, specialty);
+CREATE INDEX idx_jobs_active ON jobs(is_active, closing_date);
+Role Fit Score Algorithm (Currently Missing)
+The matching algorithm needs to calculate how well a job fits the user's profile:
+
+Role Fit Calculation:
+javascript
+function calculateRoleFitScore(userProfile, jobDetails) {
+    let score = 0;
+    let maxScore = 100;
+    
+    // 1. Band Match (25 points)
+    if (userProfile.preferredBands.includes(jobDetails.band)) {
+        score += 25;
+    } else if (userProfile.currentBand && isWithinOneband(userProfile.currentBand, jobDetails.band)) {
+        score += 15; // Close match
+    }
+    
+    // 2. Location Preference (20 points)  
+    const locationScore = calculateLocationMatch(userProfile.preferredLocations, jobDetails.location);
+    score += locationScore * 20;
+    
+    // 3. Specialty Match (20 points)
+    if (userProfile.specialties.some(spec => jobDetails.title.toLowerCase().includes(spec.toLowerCase()))) {
+        score += 20;
+    }
+    
+    // 4. Skills Match (15 points)
+    const skillsMatch = calculateSkillsOverlap(userProfile.skills, jobDetails.description);
+    score += skillsMatch * 15;
+    
+    // 5. Visa Requirements (10 points)
+    if (userProfile.needsVisaSponsorship) {
+        if (jobDetails.visa_sponsorship) {
+            score += 10;
+        } else {
+            score -= 20; // Penalty for visa needed but not available
+        }
+    } else {
+        score += 10; // No visa needed
+    }
+    
+    // 6. Experience Level (10 points)
+    const expMatch = matchExperienceLevel(userProfile.experience, jobDetails.description);
+    score += expMatch * 10;
+    
+    return Math.max(0, Math.min(100, score)); // Clamp between 0-100
+}
+
+function calculateSkillsOverlap(userSkills, jobDescription) {
+    const jobDescLower = jobDescription.toLowerCase();
+    const matchingSkills = userSkills.filter(skill => 
+        jobDescLower.includes(skill.toLowerCase())
+    );
+    return matchingSkills.length / userSkills.length;
+}
+Job Search Interface Fixes Required
+1. Search Functionality:
+javascript
+// Fix the search API endpoint
+const searchJobs = async (filters) => {
+    const response = await fetch('/api/jobs/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            keyword: filters.keyword,
+            location: filters.location,
+            band: filters.band,
+            specialty: filters.specialty,
+            visaSponsorship: filters.needsVisa,
+            maxDistance: filters.distance
+        })
+    });
+    
+    const jobs = await response.json();
+    
+    // Calculate role fit scores for each job
+    const jobsWithScores = jobs.map(job => ({
+        ...job,
+        roleFitScore: calculateRoleFitScore(userProfile, job),
+        matchReasons: getMatchReasons(userProfile, job)
+    }));
+    
+    // Sort by role fit score (highest first)
+    return jobsWithScores.sort((a, b) => b.roleFitScore - a.roleFitScore);
+};
+2. Job Detail Page:
+javascript
+// Fix the job detail view
+const JobDetailPage = ({ jobId }) => {
+    const [job, setJob] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        fetchJobDetails(jobId)
+            .then(setJob)
+            .finally(() => setLoading(false));
+    }, [jobId]);
+    
+    if (loading) return <div>Loading job details...</div>;
+    if (!job) return <div>Job not found</div>;
+    
+    return (
+        <div className="job-detail">
+            <div className="job-header">
+                <h1>{job.title}</h1>
+                <div className="role-fit-badge">
+                    Role Fit: {job.roleFitScore}%
+                </div>
+            </div>
+            
+            <div className="job-info">
+                <p><strong>Trust:</strong> {job.trust}</p>
+                <p><strong>Location:</strong> {job.location}</p>
+                <p><strong>Band:</strong> {job.band}</p>
+                <p><strong>Salary:</strong> {job.salary}</p>
+                <p><strong>Closing Date:</strong> {job.closing_date}</p>
+            </div>
+            
+            <div className="job-description">
+                <h3>Job Description</h3>
+                <p>{job.description}</p>
+            </div>
+            
+            <div className="person-spec">
+                <h3>Person Specification</h3>
+                <p>{job.person_specification}</p>
+            </div>
+            
+            <div className="actions">
+                <button onClick={() => generateApplication(job)}>
+                    Generate Supporting Information
+                </button>
+                <button onClick={() => window.open(job.external_url)}>
+                    Apply on NHS Jobs
+                </button>
+            </div>
+        </div>
+    );
+};
+Implementation Priority:
+Immediate Fixes (THIS WEEK):
+Fix search API - Make job searching actually work
+Fix job detail pages - Users can view full job information
+Implement role fit scoring - Show match percentages
+Add sample job data - At least 50-100 real NHS jobs for testing
+Next Phase (FOLLOWING WEEK):
+Build web scrapers for NHS Jobs, Trac Jobs, NHS Scotland
+Implement automated scraping - Update job database daily
+Add advanced filters - Band, specialty, visa sponsorship, distance
+Improve matching algorithm - More sophisticated role fit calculation
+Critical Success Criteria:
+✅ Users can search and find relevant NHS jobs
+✅ Job details display properly with all information
+✅ Role fit scores show accurate matching percentages
+✅ Jobs link correctly to external application pages
+✅ Search filters work (location, band, specialty)
+✅ Database updates with fresh job listings regularly
+Without working job search, the entire platform is useless. This is the highest priority fix needed immediately.
+

@@ -1,0 +1,196 @@
+# Admin System & Custom AI Prompts - Implementation Questions
+
+## 1. Custom AI Prompts (Hidden from Users)
+
+**We need to create custom prompts for ChatGPT/AI generation that users never see**
+
+### Requirements:
+- **CV Generation**: Custom prompts that understand NHS format, healthcare terminology, STAR methodology
+- **Supporting Information**: Prompts that map to NHS person specifications and values
+- **Interview Q&A**: Role-specific prompts that generate NHS-style questions
+- **Henry's Responses**: Knowledge base prompts for the chatbot assistant
+
+### Questions for You:
+1. **How can we store custom AI prompts** that are completely hidden from users?
+2. **Can we create a prompt management system** where we can edit/update prompts without code changes?
+3. **How do we inject user data** (profile, job description) into these hidden prompts?
+4. **What's the best way to version control prompts** so we can test improvements?
+
+### Example Implementation Needed:
+```javascript
+// Hidden prompt templates
+const hiddenPrompts = {
+  cvGeneration: `
+    You are an expert NHS recruitment specialist. Generate a 2-page CV for a healthcare professional applying to NHS roles.
+    
+    RULES:
+    - Use UK spelling and NHS terminology
+    - Format with clear sections: Summary, Skills, Experience, Education, Certifications
+    - Include measurable outcomes using STAR methodology
+    - Match tone to: {USER_EXPERIENCE_LEVEL}
+    - Target band level: {TARGET_BAND}
+    
+    USER DATA:
+    {USER_PROFILE}
+    
+    JOB REQUIREMENTS:
+    {JOB_DESCRIPTION}
+    
+    Generate professional CV content now:
+  `,
+  
+  supportingInfo: `
+    Create NHS Supporting Information (900-1200 words) that directly addresses person specification...
+    [USERS NEVER SEE THIS PROMPT]
+  `
+};
+```
+
+## 2. Admin Dashboard & Platform Management
+
+**We need a comprehensive admin system to manage the entire platform**
+
+### Admin Dashboard Requirements:
+
+#### User Management:
+- **View all users**: Search, filter by subscription status, registration date
+- **User details**: Profile completion, payment history, usage stats
+- **Subscription management**: Manually upgrade/downgrade users, extend access
+- **Support tickets**: View Henry escalations, user messages, response tracking
+
+#### Content Management System (CMS):
+- **Job listings**: Manually add/edit NHS jobs, mark as featured/sponsored
+- **Resources hub**: Upload guides, checklists, mini-courses, CPD materials  
+- **Templates**: Edit CV/Supporting Information templates and examples
+- **FAQ management**: Update Henry's knowledge base responses
+
+#### Platform Analytics:
+- **User journey tracking**: Where users drop off, most used features
+- **Conversion metrics**: Free-to-paid conversion rates, feature usage
+- **AI generation stats**: Most generated documents, success rates
+- **Performance monitoring**: Page load times, error rates, uptime
+
+#### AI/Prompt Management:
+- **Prompt editor**: Modify AI generation prompts without coding
+- **A/B testing**: Test different prompt versions for better outputs
+- **Quality monitoring**: Review generated content quality, user feedback
+- **Henry training**: Update chatbot responses, add new knowledge areas
+
+### Questions for You:
+
+1. **How can we build an admin dashboard** that's separate from the main user interface?
+2. **What's the best way to implement role-based access** (super admin, content admin, support admin)?
+3. **Can we create a CMS for non-technical team members** to manage content?
+4. **How do we track and log all admin actions** for security/audit purposes?
+
+### Admin Dashboard Structure:
+```
+/admin (protected route)
+├── /dashboard (overview stats)
+├── /users (user management)
+├── /content (CMS for resources)  
+├── /prompts (AI prompt editor)
+├── /analytics (platform metrics)
+├── /support (Henry tickets)
+├── /settings (platform config)
+└── /logs (admin activity)
+```
+
+## 3. Henry the Helper Training System
+
+**We need to continuously improve Henry's responses and knowledge**
+
+### Henry Training Requirements:
+
+#### Knowledge Base Management:
+- **Add new responses**: For common user questions
+- **Edit existing responses**: Improve clarity and helpfulness  
+- **Category management**: Organize by topic (payment, technical, NHS guidance)
+- **Response testing**: Preview how Henry will respond before going live
+
+#### Learning from Interactions:
+- **Conversation logging**: Track what users ask Henry
+- **Escalation analysis**: Why did conversations escalate to human support?
+- **Response effectiveness**: Did Henry's answer solve the user's problem?
+- **Common question identification**: Auto-suggest new responses needed
+
+#### Admin Training Interface:
+```javascript
+// Henry admin training panel
+const HenryAdmin = () => {
+  return (
+    <div className="henry-training">
+      <section className="knowledge-base">
+        <h2>Henry's Knowledge Base</h2>
+        <button>Add New Response</button>
+        <table>
+          <tr>
+            <th>User Question Pattern</th>
+            <th>Henry's Response</th>
+            <th>Category</th>
+            <th>Success Rate</th>
+            <th>Actions</th>
+          </tr>
+          <tr>
+            <td>"how much cost"</td>
+            <td>"£70 lifetime access..."</td>
+            <td>Pricing</td>
+            <td>94%</td>
+            <td>Edit | Test | Delete</td>
+          </tr>
+        </table>
+      </section>
+      
+      <section className="recent-escalations">
+        <h2>Recent Escalations to Human Support</h2>
+        {/* List conversations Henry couldn't handle */}
+      </section>
+      
+      <section className="response-tester">
+        <h2>Test Henry's Response</h2>
+        <input placeholder="Type a user question..." />
+        <button>See Henry's Response</button>
+      </section>
+    </div>
+  );
+};
+```
+
+### Questions for You:
+
+1. **How can we create a training interface** for non-technical team members to improve Henry?
+2. **Can we implement machine learning** to improve Henry's responses over time?
+3. **How do we handle sensitive/complex questions** that Henry shouldn't attempt to answer?
+4. **What's the best way to organize Henry's knowledge base** for easy management?
+
+## Implementation Priority:
+
+### Phase 1: Basic Admin System
+- Admin login/authentication
+- User management dashboard
+- Basic prompt editing interface
+
+### Phase 2: Content Management
+- Resources upload system
+- Job management interface  
+- Henry knowledge base editor
+
+### Phase 3: Advanced Analytics  
+- User journey tracking
+- AI generation monitoring
+- Performance dashboards
+
+### Phase 4: Machine Learning Integration
+- Automated Henry improvements
+- Predictive user behavior
+- Advanced prompt optimization
+
+## Security Considerations:
+
+- **Admin access control**: Strong authentication, IP restrictions if needed
+- **Audit logging**: Track all admin changes with timestamps and user IDs  
+- **Data protection**: Ensure admin can't access user's private documents
+- **Prompt security**: Hidden prompts never exposed in frontend code
+- **Role separation**: Different admin levels (content, support, super admin)
+
+Can you help us implement these admin capabilities and hidden prompt systems?

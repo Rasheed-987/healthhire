@@ -1,0 +1,137 @@
+Homepage goals (in order)
+
+Get visitors to create a free account
+Showcase the one-stop features (profile → jobs → documents → interviews → tracking → resources)
+Highlight Henry the Helper as the smart assistant throughout
+Build trust (NHS-experienced experts, privacy, testimonials)
+
+
+Above the fold (Hero)
+ 
+Headline: Your job journey in one place.
+Subhead: Build your profile, find roles, craft supporting information with Henry the Helper, track applications, and get interview-ready — all in one portal.
+Primary CTA: Create free account
+
+Optional visual: screenshot of dashboard + a small Henry speech bubble:
+
+“I can tailor your supporting information to this role. Want me to start?”
+
+Social proof strip
+Logos or simple text pills: “Used by NHS applicants across the UK” • “Guidance written by NHS-experienced experts” • “Practical tools for IMGs and UK applicants”
+
+Value grid: The one-stop shop (6–8 cards)
+
+Each card = icon, 1-line headline, 1–2 lines copy, “Try it” deeplink (if logged in) or “Create free account”.
+
+Candidate Profile
+Keep a clean, reusable profile that powers your CV and applications.
+
+Find & Save Jobs
+Search NHS roles, save favourites, and apply with confidence.
+
+Job Tracker
+Track every application, interview, and outcome - all in one view.
+
+Supporting Information & Cover Letters
+Use Henry the Helper to tailor strong, role-matched documents.
+
+Interview Practice
+Timed Q&A with structured feedback and model answers.
+
+Role-Specific Questions
+Ask Henry for likely questions by role and see example responses.
+
+Resource Library
+Guides, templates, and checklists built by NHS-experienced experts.
+
+Referral Programme
+Invite friends, support each other, and earn rewards.
+
+CTA under grid: Create free account (primary) | See how it works (secondary scroll)
+
+“How it works” (3 steps)
+
+1) Build your profile
+Add your experience, education, and key skills once.
+
+2) Find roles & tailor documents
+Search jobs, then let Henry the Helper shape supporting information to the person specification.
+
+3) Apply, track, and prepare
+Use the job tracker and interview practice to stay organised and confident.
+
+Inline CTA: Start in 2 minutes
+
+Henry the Helper (spotlight section)
+
+Headline: Meet Henry the Helper — your smart assistant
+Copy: Henry helps you turn your profile and the job’s criteria into clear, tailored documents and interview prep. No jargon just practical guidance when you need it.
+
+Example prompts (pills):
+
+“Tailor my supporting information for Band 5 Radiographer in Leeds.”
+“Give me likely interview questions for an HCA role in London.”
+“Turn these bullet points into a concise cover letter.”
+
+Job Tracker (peek section)
+
+Headline: Stay on top of every application
+Copy: See applied, interview, offer, and outcome at a glance. Add notes, deadlines, and next steps.
+
+3 mini tiles (read-only preview):
+
+“Radiographer — Band 5, Leeds” → Status: Interview booked
+“HCA — Band 3, London” → Status: Applied (Supporting info drafted)
+“Biomedical Scientist — Birmingham” → Status: Offer received
+
+CTA: Use the job tracker
+
+Interview practice (confidence builder)
+
+Headline: Practice answers. Get feedback. Improve fast.
+Copy: Timed sessions with structured feedback and model answers to common NHS questions (including the 6Cs).
+Bullets: Timed mode • Instant structure tips • Model answers • Save and review
+
+CTA: Start a practice session
+
+Resources & News (2-column feed)
+
+Left: Latest resources (3 items) — e.g., “Supporting Information: A step-by-step template”, “CV: 2-page guide for NHS roles”, “Interview: 6Cs answer examples”
+Right: Healthcare news & updates (3 items) — short teasers linking to your News page.
+
+CTA row: Explore resources | Read news
+
+Referral programme (band)
+
+Headline: Help a friend — help your career
+Copy: Invite peers and earn rewards.
+CTA: Get your referral link
+
+Conversion band (near footer)
+
+Headline: Create your free account**
+Copy: Explore every feature. Upgrade later if you need more.
+Primary CTA: Create free account
+
+Footer
+
+Columns:
+
+Company: About, Contact, Partners
+Support: Help Centre, Privacy, Terms, Cookies
+Small print: “Guidance authored by NHS-experienced experts. Always follow your employer’s policies.”
+
+Microcopy & UX guidelines (no code)
+
+No “AI” language. Always “Henry the Helper,” “smart assistant,” “tailored guidance.”
+
+
+
+
+Personalisation (once signed in)
+
+
+
+
+Trust elements
+

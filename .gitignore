@@ -1,0 +1,46 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+
+# Build output
+dist/
+build/
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debugging files
+healthjobsuk_debug.png
+
+# Miscellaneous
+local/
+*.bak
+*.swp
+*.tmp
+
+# Google Cloud Storage credentials
+gcs-key.json
+*-gcs-key.json
+service-account-key.json

@@ -1,0 +1,577 @@
+Free Tier Feature Restrictions - Implementation Guide
+🆓 Updated Free vs Paid Feature Access
+Need to clarify and implement proper freemium restrictions throughout the platform.
+
+Free Users CAN Fully Access:
+✅ Section 1: Candidate Profile ("Who are you?")
+FULL ACCESS - No restrictions
+
+Complete profile wizard
+Upload evidence documents
+Build STAR examples
+Values assessment
+Profile completeness meter
+All profile editing and updates
+
+✅ Section 8: News & Updates
+FULL ACCESS - No restrictions
+
+View all latest news and updates
+Read platform announcements
+Access NHS recruitment news
+View success stories and tips
+
+
+Free Users CAN Browse But NOT Use:
+👁️ Section 2: Job Finder
+PREVIEW MODE - Show features but block usage
+javascriptconst JobFinderFree = () => {
+  return (
+    <div className="job-finder-preview">
+      <div className="feature-preview">
+        <h3>🔍 Smart Job Matching</h3>
+        <p>AI-powered role fit scoring to find your perfect NHS positions</p>
+        <div className="preview-content opacity-50">
+          {/* Show 2-3 sample job cards but grayed out */}
+          <div className="sample-jobs">
+            <div className="job-card-preview">
+              <h4>Band 5 Staff Nurse - Emergency Department</h4>
+              <p>Manchester University NHS Foundation Trust</p>
+              <span className="role-fit-badge">Role Fit: 94%</span>
+            </div>
+          </div>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock Job Search - Upgrade Now
+        </button>
+      </div>
+      
+      <div className="feature-preview">
+        <h3>🎯 Advanced Filters</h3>
+        <p>Filter by band, specialty, location, visa sponsorship</p>
+        <div className="filters-preview opacity-50">
+          {/* Show filter interface but disabled */}
+          <select disabled><option>Select Band</option></select>
+          <select disabled><option>Select Specialty</option></select>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock Filters - Upgrade Now
+        </button>
+      </div>
+    </div>
+  );
+};
+👁️ Section 3: Application Documents
+LIMITED PREVIEW - Show CV preview only
+javascriptconst ApplicationDocumentsFree = () => {
+  return (
+    <div className="application-docs-preview">
+      <div className="cv-preview-section">
+        <h3>📄 Your CV Preview</h3>
+        <div className="cv-preview-container">
+          {/* Show only top section of CV */}
+          <div className="cv-preview-visible">
+            <h4>{user.name}</h4>
+            <p>{user.email} | {user.phone}</p>
+            <p>{user.location}</p>
+            <h5>Professional Summary</h5>
+            <p>{user.summary?.substring(0, 150)}...</p>
+          </div>
+          
+          {/* Blur/fade effect for rest of CV */}
+          <div className="cv-preview-locked">
+            <div className="blurred-content">
+              <div className="fake-text-lines">
+                <div className="line"></div>
+                <div className="line"></div>
+                <div className="line short"></div>
+              </div>
+            </div>
+            <div className="unlock-overlay">
+              <button className="upgrade-prompt">
+                🔒 Unlock Full CV - Upgrade for £70
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="feature-preview">
+        <h3>✨ Supporting Information Generator</h3>
+        <p>AI-powered 900-1200 word responses tailored to NHS person specifications</p>
+        <div className="sample-output opacity-50">
+          <textarea 
+            disabled 
+            value="I am writing to express my strong interest in the Staff Nurse position..."
+            rows={4}
+          />
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Unlock AI Generation - Upgrade Now  
+        </button>
+      </div>
+    </div>
+  );
+};
+👁️ Section 4: Resources Hub
+PREVIEW MODE - Show features but block usage
+javascriptconst ResourcesHubFree = () => {
+  return (
+    <div className="resources-preview">
+      <div className="feature-preview">
+        <h3>📚 NHS Application Guides</h3>
+        <p>Expert guides on CV writing, Supporting Information, and interview techniques</p>
+        <div className="preview-content opacity-50">
+          <div className="guide-list">
+            <div className="guide-item">📄 "Perfect NHS Supporting Information Guide"</div>
+            <div className="guide-item">🎯 "Person Specification Mapping Masterclass"</div>
+            <div className="guide-item">💼 "NHS Values in Practice"</div>
+          </div>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Access All Guides - Upgrade Now
+        </button>
+      </div>
+      
+      <div className="feature-preview">
+        <h3>📋 Templates & Checklists</h3>
+        <p>Ready-to-use templates and comprehensive checklists</p>
+        <div className="templates-preview opacity-50">
+          <div className="template-list">
+            <div className="template-item">✅ Application Checklist</div>
+            <div className="template-item">📝 STAR Examples Template</div>
+            <div className="template-item">🎤 Interview Prep Checklist</div>
+          </div>
+        </div>
+        <button className="upgrade-prompt">
+          🔒 Download Templates - Upgrade Now
+        </button>
+      </div>
+    </div>
+  );
+};
+PREVIEW MODE - Show interface but block usage
+javascriptconst InterviewPracticeFree = () => {
+  return (
+    <div className="interview-preview">
+      <h3>🎤 Mock Interview Practice</h3>
+      <p>Practice NHS values-based questions with AI feedback</p>
+      
+      <div className="preview-interface opacity-50">
+        <div className="question-preview">
+          <h4>Sample Question:</h4>
+          <p>"Tell me about a time you showed compassion to a patient"</p>
+        </div>
+        <textarea disabled placeholder="Your answer would go here..."></textarea>
+        <button disabled>Submit for Feedback</button>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Unlock Interview Practice - Upgrade Now
+      </button>
+    </div>
+  );
+};
+👁️ Section 5: Interview Practice
+PREVIEW MODE - Show sample questions but no generation
+javascriptconst QAGeneratorFree = () => {
+  return (
+    <div className="qa-preview">
+      <h3>❓ Interview Questions Generator</h3>
+      <p>Generate role-specific interview questions with model answers</p>
+      
+      <div className="sample-questions opacity-50">
+        <h4>Sample Questions for Staff Nurse:</h4>
+        <ul>
+          <li>How do you prioritize patient care during busy shifts?</li>
+          <li>Describe your experience with multidisciplinary teamwork</li>
+          <li>How do you handle difficult or distressed patients?</li>
+        </ul>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Generate Questions for Any Role - Upgrade Now
+      </button>
+    </div>
+  );
+};
+👁️ Section 6: Q&A Generator
+PREVIEW MODE - Show empty dashboard with upgrade prompts
+javascriptconst JobTrackerFree = () => {
+  return (
+    <div className="tracker-preview">
+      <h3>📊 Job Application Tracker</h3>
+      <p>Track applications from draft to offer with Kanban board</p>
+      
+      <div className="preview-dashboard opacity-50">
+        <div className="kanban-preview">
+          <div className="column">
+            <h4>Draft</h4>
+            <div className="empty-column">No applications yet</div>
+          </div>
+          <div className="column">  
+            <h4>Applied</h4>
+            <div className="empty-column">Track your applications here</div>
+          </div>
+          <div className="column">
+            <h4>Interview</h4>
+            <div className="empty-column">Monitor interview progress</div>
+          </div>
+        </div>
+      </div>
+      
+      <button className="upgrade-prompt">
+        🔒 Unlock Application Tracking - Upgrade Now
+      </button>
+    </div>
+  );
+};
+👁️ Section 7: Job Tracker & Analytics
+Section Card Behavior:
+javascriptconst SectionCard = ({ section, isPaid }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    if (section.id === 'profile' || section.id === 'resources') {
+      // Full access sections
+      navigate(section.path);
+    } else if (!isPaid) {
+      // Preview mode for paid features
+      navigate(`${section.path}/preview`);
+    } else {
+      // Full access for paid users
+      navigate(section.path);
+    }
+  };
+
+  return (
+    <div 
+      className="section-card cursor-pointer" 
+      onClick={handleCardClick}
+    >
+      <h3>{section.title}</h3>
+      <p>{section.description}</p>
+      
+      {!isPaid && section.isPremium && (
+        <div className="premium-badge">
+          <span className="text-yellow-600">👑 Premium</span>
+        </div>
+      )}
+    </div>
+  );
+};
+Upgrade Prompt Component:
+javascriptconst UpgradePrompt = ({ feature }) => {
+  return (
+    <div className="upgrade-prompt-overlay">
+      <div className="upgrade-content">
+        <h3>🔒 Unlock {feature}</h3>
+        <p>Get full access to all HealthHire Portal features for just £70 one-time payment</p>
+        <ul className="upgrade-benefits">
+          <li>✅ Unlimited job searching with AI matching</li>
+          <li>✅ AI-powered CV and Supporting Information generation</li>
+          <li>✅ Interview practice with feedback</li>
+          <li>✅ Application tracking and analytics</li>
+          <li>✅ Lifetime access - no recurring fees</li>
+        </ul>
+        <button 
+          onClick={() => navigate('/upgrade')}
+          className="btn-upgrade bg-green-600 text-white px-6 py-3 rounded-lg"
+        >
+          Upgrade Now - £70 One-Time
+        </button>
+      </div>
+    </div>
+  );
+};
+Master CV PDF Template System
+Professional NHS CV Template (PDF Generation):
+javascriptconst generateCVPDF = async (profileData) => {
+  // Use library like jsPDF or Puppeteer for PDF generation
+  const { jsPDF } = require('jspdf');
+  const doc = new jsPDF();
+
+  // NHS CV Template Layout
+  doc.setFontSize(20);
+  doc.setTextColor(0, 94, 184); // NHS Blue
+  doc.text(profileData.name, 20, 30);
+  
+  // Contact Information
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`${profileData.email} | ${profileData.phone} | ${profileData.location}`, 20, 40);
+  
+  // Professional Summary Section
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('PROFESSIONAL SUMMARY', 20, 55);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  const summaryLines = doc.splitTextToSize(profileData.summary, 170);
+  doc.text(summaryLines, 20, 65);
+  
+  // Key Skills Section
+  let yPosition = 85;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('KEY SKILLS & COMPETENCIES', 20, yPosition);
+  
+  yPosition += 10;
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  profileData.skills.forEach(skill => {
+    doc.text(`• ${skill}`, 20, yPosition);
+    yPosition += 5;
+  });
+  
+  // Work Experience Section
+  yPosition += 10;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('PROFESSIONAL EXPERIENCE', 20, yPosition);
+  
+  profileData.workExperience.forEach(job => {
+    yPosition += 10;
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${job.title} - ${job.company}`, 20, yPosition);
+    
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${job.startDate} - ${job.endDate} | ${job.location}`, 20, yPosition);
+    
+    yPosition += 7;
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    job.duties.forEach(duty => {
+      const dutyLines = doc.splitTextToSize(`• ${duty}`, 160);
+      doc.text(dutyLines, 25, yPosition);
+      yPosition += dutyLines.length * 4;
+    });
+    yPosition += 3;
+  });
+  
+  // Education Section
+  if (yPosition > 250) {
+    doc.addPage();
+    yPosition = 20;
+  }
+  
+  yPosition += 10;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('EDUCATION & QUALIFICATIONS', 20, yPosition);
+  
+  profileData.education.forEach(edu => {
+    yPosition += 10;
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`${edu.qualification} - ${edu.institution}`, 20, yPosition);
+    
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`${edu.year} | ${edu.grade}`, 20, yPosition);
+  });
+  
+  // Professional Registrations
+  yPosition += 15;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('PROFESSIONAL REGISTRATIONS', 20, yPosition);
+  
+  profileData.registrations.forEach(reg => {
+    yPosition += 8;
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`• ${reg.body}: ${reg.number} (Expires: ${reg.expiry})`, 20, yPosition);
+  });
+  
+  // References
+  yPosition += 15;
+  doc.setFontSize(14);
+  doc.setTextColor(0, 94, 184);
+  doc.text('REFERENCES', 20, yPosition);
+  
+  yPosition += 8;
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Available upon request', 20, yPosition);
+  
+  return doc;
+};
+
+// CV Download Function
+const downloadCVPDF = async (profileData) => {
+  try {
+    const pdf = await generateCVPDF(profileData);
+    pdf.save(`${profileData.name.replace(' ', '_')}_NHS_CV.pdf`);
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+  }
+};
+CV Viewer with PDF Template:
+javascriptconst CVViewerPage = () => {
+  const [cvData, setCvData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Load user profile data and generate CV structure
+    loadProfileAndGenerateCV()
+      .then(setCvData)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleDownloadPDF = async () => {
+    await downloadCVPDF(cvData);
+  };
+
+  return (
+    <div className="cv-viewer">
+      <div className="cv-header">
+        <h1>Your NHS CV</h1>
+        <div className="cv-actions">
+          <button 
+            onClick={handleDownloadPDF}
+            className="btn-download bg-blue-600 text-white px-6 py-3 rounded-lg"
+          >
+            📄 Download Professional PDF
+          </button>
+        </div>
+      </div>
+
+      {/* CV Preview (mirrors PDF template) */}
+      <div className="cv-preview bg-white p-8 shadow-lg max-w-4xl mx-auto">
+        <div className="cv-header-section">
+          <h2 className="text-2xl font-bold text-blue-800">{cvData?.name}</h2>
+          <p className="text-gray-600">{cvData?.email} | {cvData?.phone} | {cvData?.location}</p>
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            PROFESSIONAL SUMMARY
+          </h3>
+          <p className="text-sm leading-relaxed">{cvData?.summary}</p>
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            KEY SKILLS & COMPETENCIES
+          </h3>
+          <ul className="text-sm">
+            {cvData?.skills?.map(skill => (
+              <li key={skill} className="mb-1">• {skill}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            PROFESSIONAL EXPERIENCE
+          </h3>
+          {cvData?.workExperience?.map(job => (
+            <div key={job.id} className="mb-4">
+              <h4 className="font-semibold">{job.title} - {job.company}</h4>
+              <p className="text-sm text-gray-600">{job.startDate} - {job.endDate} | {job.location}</p>
+              <ul className="text-sm mt-2">
+                {job.duties.map(duty => (
+                  <li key={duty} className="mb-1 ml-4">• {duty}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            EDUCATION & QUALIFICATIONS
+          </h3>
+          {cvData?.education?.map(edu => (
+            <div key={edu.id} className="mb-2">
+              <h4 className="font-medium">{edu.qualification} - {edu.institution}</h4>
+              <p className="text-sm text-gray-600">{edu.year} | {edu.grade}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            PROFESSIONAL REGISTRATIONS
+          </h3>
+          {cvData?.registrations?.map(reg => (
+            <p key={reg.id} className="text-sm mb-1">
+              • {reg.body}: {reg.number} (Expires: {reg.expiry})
+            </p>
+          ))}
+        </div>
+
+        <div className="cv-section mt-6">
+          <h3 className="text-lg font-semibold text-blue-800 border-b-2 border-blue-800 mb-3">
+            REFERENCES
+          </h3>
+          <p className="text-sm">Available upon request</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+Free Tier Navigation Implementation:
+Section Card Behavior:
+javascriptconst SectionCard = ({ section, isPaid }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    if (section.id === 'profile' || section.id === 'news') {
+      // Full access sections - profile and news only
+      navigate(section.path);
+    } else if (!isPaid) {
+      // Preview mode for all other paid features
+      navigate(`${section.path}/preview`);
+    } else {
+      // Full access for paid users
+      navigate(section.path);
+    }
+  };
+
+  return (
+    <div 
+      className="section-card cursor-pointer" 
+      onClick={handleCardClick}
+    >
+      <h3>{section.title}</h3>
+      <p>{section.description}</p>
+      
+      {!isPaid && section.isPremium && (
+        <div className="premium-badge">
+          <span className="text-yellow-600">👑 Premium</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+Summary of Free Tier Access:
+✅ FULL ACCESS (Can Use Everything):
+
+Candidate Profile - Complete profile management
+News & Updates (Section 8) - All platform news and updates
+
+👁️ PREVIEW ONLY (Can See But Not Use):
+
+Job Finder - Show interface and sample jobs, block search/details
+Application Documents - Show CV preview (top section only), block generation
+Resources Hub - Show guides/templates list but block access
+Interview Practice - Show sample questions, block practice sessions
+Q&A Generator - Show sample questions, block generation
+Job Tracker - Show empty dashboard, block tracking functionality
+
+💳 Upgrade Prompts:
+
+Clear "Unlock for £70" buttons throughout preview sections
+Highlight lifetime access value
+Show what they're missing out on
+
+This gives free users enough value to understand the platform while creating strong incentives to upgrade for the core job search and application features.

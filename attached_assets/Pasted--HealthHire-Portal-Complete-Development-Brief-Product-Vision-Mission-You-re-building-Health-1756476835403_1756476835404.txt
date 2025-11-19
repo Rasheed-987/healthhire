@@ -1,0 +1,155 @@
+# HealthHire Portal - Complete Development Brief
+
+## Product Vision & Mission
+You're building HealthHire Portal, a comprehensive career toolkit that transforms healthcare job hunting from scattered, manual processes into a guided, intelligent journey. This isn't just another job board—it's a complete career acceleration platform specifically designed for overseas healthcare professionals, UK care workers transitioning to NHS roles, and health/science graduates.
+
+**Core Value Proposition**: Take someone from "who am I and what fits me?" all the way to "offer accepted" through AI-powered personalization, NHS-specific expertise, and gamified engagement.
+
+## Target Users & Pain Points
+
+### Primary Audiences:
+1. **Overseas Healthcare Professionals** - Need visa guidance, UK workplace culture understanding, credential translation
+2. **UK Care Workers → NHS Transition** - Require band progression knowledge, Supporting Information expertise
+3. **New Health/Science Graduates** - Need career direction, interview confidence, application optimization
+
+### Pain Points You're Solving:
+- NHS applications are uniquely complex (Supporting Information, person specs, values alignment)
+- Generic CVs fail in healthcare settings that need evidence-based, measurable outcomes
+- Interview prep lacks NHS-specific values focus and clinical scenario practice
+- Job tracking across multiple trusts is fragmented and overwhelming
+- Visa/registration requirements create eligibility confusion
+
+## Technical Architecture Principles
+
+### Stack Recommendations:
+- **Frontend**: React/Next.js for rich interactivity and dashboard complexity
+- **Backend**: Node.js/Express or Python/FastAPI for AI integration capabilities
+- **Database**: PostgreSQL for relational job/profile data + Redis for caching
+- **AI Integration**: OpenAI GPT-4 or Claude for document generation + embeddings for job matching
+- **File Storage**: AWS S3 or similar for document uploads (CVs, certificates)
+- **Authentication**: Auth0 or similar for robust user management
+- **Deployment**: Vercel/Netlify (frontend) + Railway/Render (backend)
+
+### Data Architecture:
+- **User Profiles**: Nested JSON for complex healthcare qualifications (GMC/NMC/HCPC numbers, specialties, band preferences)
+- **Job Matching**: Vector embeddings for role fit scoring
+- **STAR Examples**: Structured storage for reusable interview/application content
+- **Document Versioning**: Track iterations of CVs/Supporting Info with change history
+- **Analytics**: Event tracking for user journey optimization
+
+## Core User Journey & Features
+
+### 1. Profile Creation ("Who are you?")
+```
+Features to Build:
+- Multi-step wizard with progress tracking
+- Dynamic form fields based on profession/registration
+- File upload with drag-drop for certificates/documents
+- STAR example builder with guided prompts
+- NHS values self-assessment with scoring
+- Profile completeness meter with actionable tips
+```
+
+### 2. Job Discovery & Matching
+```
+Features to Build:
+- NHS Jobs API integration (or web scraping with caching)
+- Advanced filtering with healthcare-specific parameters
+- Role Fit Score algorithm (skills + location + eligibility matching)
+- Saved searches with email alerts
+- Pay band calculator with progression modeling
+- Trust insights integration where available
+```
+
+### 3. AI-Powered Document Generation
+```
+Critical AI Features:
+- Supporting Information Generator (900-1200 words, values-mapped)
+- CV Generator (2-page NHS format with STAR bullets)
+- Person Spec Mapper (auto-tick criteria matching)
+- Multiple tone options (early-career, overseas, career-change)
+- Quality guardrails (plain language, cliché detection)
+- Version control with side-by-side comparison
+```
+
+### 4. Interview Practice & Feedback
+```
+Features to Build:
+- Mock interview simulator with timed responses
+- Q&A bank generator based on job descriptions
+- AI feedback engine scoring: clarity, STAR structure, values alignment
+- Audio recording capability with transcription
+- Progress tracking with improvement suggestions
+- Practice streak gamification
+```
+
+### 5. Application Tracking Dashboard
+```
+Features to Build:
+- Kanban board interface (Draft→Applied→Interview→Offered)
+- Application cards with smart reminders
+- KPI dashboard with success metrics
+- Motivational tips and daily challenges
+- Referral tracking system
+```
+
+## Key Technical Challenges & Solutions
+
+### AI Integration Strategy:
+- **Prompt Engineering**: Create role-specific, NHS-values-aligned generation prompts
+- **Context Management**: Inject user profile + job description + STAR examples efficiently
+- **Quality Control**: Implement human-reviewable AI outputs with feedback loops
+- **Cost Management**: Cache common generations, implement usage limits
+
+### Healthcare-Specific Requirements:
+- **Compliance**: GDPR-compliant data handling with granular consent
+- **Security**: Encrypt sensitive documents (DBS certificates, registration letters)
+- **Accuracy**: Fact-checking for medical qualifications and registration numbers
+- **Localization**: UK spelling, NHS terminology, healthcare acronyms
+
+### Performance Considerations:
+- **Large Document Processing**: Optimize PDF parsing for certificates/CVs
+- **Real-time Job Updates**: Efficient caching of NHS Jobs data
+- **Concurrent AI Requests**: Queue management for document generation
+- **Mobile Responsiveness**: Touch-friendly interfaces for on-the-go job searching
+
+## Monetization & Business Logic
+
+### Pricing Model:
+- **Core Platform**: £70 one-time fee for full access
+- **Upsells**: Human expert review services for documents
+- **Freemium Elements**: Limited profile creation and job browsing before purchase
+
+### Success Metrics to Track:
+- Profile completion rates
+- Job application conversion rates
+- Interview booking success
+- User engagement streaks
+- Document generation quality scores
+- Time-to-first-offer tracking
+
+## Development Phases
+
+### Phase 1 (MVP): Core Profile + Basic Job Search
+### Phase 2: AI Document Generation + Interview Practice  
+### Phase 3: Advanced Tracking + Gamification
+### Phase 4: Human Review Integration + Analytics Dashboard
+
+## Specific Implementation Notes
+
+- **NHS Jobs Integration**: Check terms of service, implement respectful scraping with caching
+- **STAR Builder**: Use progressive disclosure to guide users through situation→task→action→result
+- **Values Alignment**: Map NHS values (compassion, respect, teamwork, etc.) to generated content
+- **Eligibility Logic**: Build rules engine for visa requirements, registration status, band qualifications
+- **Document Templates**: Create NHS-compliant CV/Supporting Information layouts
+- **Gamification**: Keep badges meaningful and career-relevant, not just engagement-driven
+
+## Quality Assurance Priorities
+
+1. **AI Output Quality**: Human-reviewable generations that sound natural and professional
+2. **Data Accuracy**: Correct healthcare terminology, up-to-date NHS information
+3. **User Experience**: Intuitive flows that reduce cognitive load during stressful job searching
+4. **Performance**: Fast loading times for document generation and job search
+5. **Accessibility**: Screen reader compatible, keyboard navigation, clear visual hierarchy
+
+This is a sophisticated product that combines AI capabilities with deep healthcare domain knowledge. Focus on building robust, scalable foundations that can handle the complexity of NHS recruitment while maintaining an excellent user experience.

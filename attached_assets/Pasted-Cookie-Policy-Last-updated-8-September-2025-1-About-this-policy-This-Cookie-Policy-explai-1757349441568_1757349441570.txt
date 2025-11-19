@@ -1,0 +1,76 @@
+Cookie Policy
+
+Last updated: 8 September 2025
+
+1) About this policy
+
+This Cookie Policy explains how HealthHire Portal / HealthHire UK (“we”, “us”) uses cookies and similar technologies on our website and app. For how we handle personal data more generally, see our Privacy Notice.
+
+2) What are cookies?
+
+Cookies are small text files placed on your device when you visit a website. They help a site work, remember your preferences, and understand how people use it. We also use similar technologies such as local storage and pixels—together referred to here as “cookies”.
+
+3) How we use cookies
+
+We use cookies for the following purposes:
+
+Essential (strictly necessary): required to run the site, keep you signed in, secure your account, process payments, and deliver core features. These run on the basis of our legitimate interests in providing a secure, functional service and do not require consent.
+
+Preferences: remember choices like language or display settings.
+
+Analytics: help us understand usage (pages visited, features used) so we can improve performance and user experience.
+
+(Optional) Marketing/Attribution: if enabled, measure the effectiveness of our campaigns and referrals.
+
+We only set non-essential cookies (Preferences, Analytics, Marketing) with your consent.
+
+4) Your choices
+
+Cookie banner: On your first visit you can Accept all, Reject all (for non-essential), or Manage settings by category.
+
+Change your mind anytime: Use the privacy link in the support centre to update your choices or withdraw consent.
+
+Browser controls: You can block or delete cookies via your browser settings. Blocking essential cookies may break parts of the site.
+
+Quick link: Cookie settings (opens the preferences manager)
+
+5) Cookies we use (examples)
+
+These are typical cookies we use or may use. Exact names can vary by provider and environment.
+
+A) Essential (always on)
+Name	Provider	Purpose	Type	Duration
+hh_session	HealthHire	Keeps you signed in and ties your actions to your account securely.	First-party	Session
+hh_csrf	HealthHire	Protects forms and actions against CSRF attacks.	First-party	Session
+cookie_consent	HealthHire	Stores your cookie preferences.	First-party	6–12 months
+__stripe_sid, __stripe_mid	Stripe 🔷	Payment processing and fraud prevention during checkout.	Third-party	Up to 1 year
+cf_bm / __cf_*	Cloudflare/host 🔷	Bot management / performance (if used).	Third-party	30 minutes–1 day
+B) Preferences (consent)
+Name	Provider	Purpose	Type	Duration
+hh_ui_pref	HealthHire	Remembers layout/theme/language choices.	First-party	6 months
+C) Analytics (consent)
+Name	Provider	Purpose	Type	Duration
+_ga, _ga_*	Google Analytics 🔷	Usage analytics (pages, events) to improve the product.	First-party	13 months
+pll_* / plausible_* 🔷	Plausible/Other	Privacy-centred analytics (if enabled).	First-party	6–12 months
+D) Marketing/Attribution (consent, if used)
+Name	Provider	Purpose	Type	Duration
+_fbp, _fbc	Meta 🔷	Campaign attribution/retargeting.	First-party	3 months
+_tt_enable_cookie	TikTok 🔷	Campaign attribution.	First-party	13 months
+
+🔷 Replace or remove providers you don’t use. If you add any new vendors (e.g., live chat, error monitoring), include them here.
+
+6) Local storage & similar tech
+
+We may use local storage to cache non-sensitive settings (e.g., UI preferences) and server-side sessions to keep you signed in. We treat these similarly to cookies in terms of consent where they’re not strictly necessary.
+
+7) Third-party cookies
+
+Some features (e.g., payments via Stripe, embedded content, or analytics) are provided by third parties who may set their own cookies. We control which categories are loaded and seek your consent where required, but those providers control how their cookies are used. Please review their policies for details.
+
+8) Changes to this policy
+
+We may update this Cookie Policy from time to time. We’ll post the latest version here and update the “Last updated” date.
+
+9) Contact us
+
+Questions about cookies? Email hello@healthhireportal.com

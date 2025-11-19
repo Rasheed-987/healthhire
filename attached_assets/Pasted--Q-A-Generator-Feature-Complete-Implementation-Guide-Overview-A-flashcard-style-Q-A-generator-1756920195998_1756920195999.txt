@@ -1,0 +1,530 @@
+# Q&A Generator Feature - Complete Implementation Guide
+
+## Overview
+A flashcard-style Q&A generator that creates 25 questions with model answers based on a user-provided job description. Uses spaced repetition similar to Duolingo to help users master interview preparation.
+
+## Core Requirements
+
+### Question Generation System
+- **Input**: User pastes job description
+- **Output**: 25 questions with detailed model answers
+- **Style**: Flashcard interface with hidden/revealed answers
+- **Learning**: Spaced repetition - repeat difficult questions until mastery
+
+### User Flow
+1. User pastes job description text
+2. ChatGPT generates 25 tailored questions + model answers
+3. User reviews flashcards one by one
+4. For each card: view question → reveal answer → mark confidence level
+5. System repeats low-confidence questions until user is satisfied
+6. Completion summary showing mastery progress
+
+## Implementation Structure
+
+### 1. Database Schema
+
+```sql
+-- Q&A Sessions
+CREATE TABLE qa_sessions (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    job_description TEXT,
+    job_title VARCHAR(255),
+    total_questions INTEGER DEFAULT 25,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP NULL
+);
+
+-- Generated Questions & Answers
+CREATE TABLE qa_questions (
+    id PRIMARY KEY,
+    session_id INTEGER REFERENCES qa_sessions(id),
+    question_text TEXT,
+    model_answer TEXT,
+    question_order INTEGER
+);
+
+-- User Progress Tracking
+CREATE TABLE qa_progress (
+    id PRIMARY KEY,
+    session_id INTEGER REFERENCES qa_sessions(id),
+    question_id INTEGER REFERENCES qa_questions(id),
+    confidence_level INTEGER, -- 1=not confident, 2=somewhat confident, 3=confident
+    attempts INTEGER DEFAULT 1,
+    last_reviewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 2. Backend API Endpoints
+
+#### Generate Q&A Session
+```
+POST /api/qa/generate
+Body: {
+    "job_description": "Full job description text...",
+    "job_title": "Staff Nurse - Band 5" // Optional, extracted if not provided
+}
+Response: {
+    "session_id": "uuid",
+    "questions": [
+        {
+            "id": 1,
+            "question": "Question text...",
+            "answer": "Model answer...",
+            "order": 1
+        }
+        // ... 24 more
+    ],
+    "total_questions": 25,
+    "disclaimer": "These questions are generated based on the job description..."
+}
+```
+
+#### Get Session Progress
+```
+GET /api/qa/session/:session_id/progress
+Response: {
+    "session_id": "uuid",
+    "current_question": 5,
+    "questions_to_review": [1, 3, 7, 12], // Questions marked as not confident
+    "mastery_progress": {
+        "confident": 15,
+        "somewhat_confident": 7,
+        "not_confident": 3
+    }
+}
+```
+
+#### Update Question Progress
+```
+POST /api/qa/progress
+Body: {
+    "session_id": "uuid",
+    "question_id": 5,
+    "confidence_level": 2 // 1, 2, or 3
+}
+Response: {
+    "success": true,
+    "next_question_id": 6,
+    "session_complete": false
+}
+```
+
+#### Complete Session
+```
+POST /api/qa/session/:session_id/complete
+Response: {
+    "success": true,
+    "summary": {
+        "total_questions": 25,
+        "total_attempts": 45,
+        "final_mastery": {
+            "confident": 25,
+            "somewhat_confident": 0,
+            "not_confident": 0
+        }
+    }
+}
+```
+
+### 3. ChatGPT Integration
+
+#### Q&A Generation Prompt
+```
+Role: NHS Interview Q&A Generator
+Task: Generate exactly 25 interview questions with detailed model answers based on this job description.
+
+Job Description:
+{job_description}
+
+Requirements:
+- Create 25 questions specifically tailored to this role and responsibilities
+- Mix question types: competency-based, scenario-based, technical knowledge, NHS values
+- Each question should have a comprehensive model answer (100-150 words)
+- Model answers should demonstrate best practices and include specific examples where appropriate
+- Consider the NHS 6Cs, patient safety, clinical governance, and professional standards
+- Questions should reflect the specific requirements, qualifications, and responsibilities mentioned in the job description
+
+IMPORTANT DISCLAIMER: While these questions are tailored to the job description, actual interview questions may vary. Use these for preparation practice.
+
+Format your response as JSON:
+{
+    "disclaimer": "These questions are generated based on your job description and are designed to help you prepare. Actual interview questions may differ, but practicing with these will help you develop strong responses to common healthcare interview themes.",
+    "job_title": "Extracted job title",
+    "questions": [
+        {
+            "question": "Question text here...",
+            "model_answer": "Comprehensive model answer here...",
+            "category": "NHS Values/Clinical Skills/Leadership/etc"
+        }
+        // ... repeat for all 25 questions
+    ]
+}
+```
+
+### 4. Frontend Components
+
+#### Job Description Input Component
+```javascript
+// QAGenerator.jsx
+const QAGenerator = () => {
+    const [jobDescription, setJobDescription] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    
+    const generateQuestions = async () => {
+        if (jobDescription.trim().length < 100) {
+            setError('Please provide a more detailed job description (minimum 100 characters)');
+            return;
+        }
+        
+        setLoading(true);
+        setError('');
+        
+        try {
+            const response = await fetch('/api/qa/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    job_description: jobDescription,
+                    job_title: extractJobTitle(jobDescription) // Helper function
+                })
+            });
+            
+            const data = await response.json();
+            navigate(`/qa/session/${data.session_id}`);
+        } catch (error) {
+            setError('Failed to generate questions. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    return (
+        <div className="max-w-4xl mx-auto p-6">
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Q&A Generator</h2>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <div className="flex items-start">
+                        <div className="text-blue-600 mr-2">ℹ️</div>
+                        <div className="text-blue-800 text-sm">
+                            <strong>Disclaimer:</strong> We cannot predict the exact questions you'll be asked in your interview. 
+                            However, these AI-generated questions based on your job description will help you practice 
+                            common healthcare interview themes and develop strong responses.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium mb-2">
+                        Job Description *
+                    </label>
+                    <textarea
+                        className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Paste the full job description here. Include key responsibilities, requirements, qualifications, and any specific skills mentioned..."
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                    />
+                    <div className="text-sm text-gray-600 mt-1">
+                        {jobDescription.length} characters (minimum 100 required)
+                    </div>
+                </div>
+                
+                {error && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-800">
+                        {error}
+                    </div>
+                )}
+                
+                <button
+                    onClick={generateQuestions}
+                    disabled={loading || jobDescription.trim().length < 100}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                    {loading ? 'Generating 25 Questions...' : 'Generate Q&A Flashcards'}
+                </button>
+            </div>
+        </div>
+    );
+};
+```
+
+#### Flashcard Session Component
+```javascript
+// QAFlashcards.jsx
+const QAFlashcards = () => {
+    const { sessionId } = useParams();
+    const [session, setSession] = useState(null);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [showAnswer, setShowAnswer] = useState(false);
+    const [progress, setProgress] = useState({});
+    const [reviewQueue, setReviewQueue] = useState([]);
+    const [isComplete, setIsComplete] = useState(false);
+    
+    const currentQuestion = session?.questions[currentQuestionIndex];
+    
+    const markConfidence = async (level) => {
+        await fetch('/api/qa/progress', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                session_id: sessionId,
+                question_id: currentQuestion.id,
+                confidence_level: level
+            })
+        });
+        
+        // Add to review queue if not confident
+        if (level === 1) {
+            setReviewQueue(prev => [...prev, currentQuestionIndex]);
+        }
+        
+        nextQuestion();
+    };
+    
+    const nextQuestion = () => {
+        setShowAnswer(false);
+        
+        if (currentQuestionIndex < session.questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+        } else if (reviewQueue.length > 0) {
+            // Start reviewing difficult questions
+            const nextReviewIndex = reviewQueue.shift();
+            setCurrentQuestionIndex(nextReviewIndex);
+            setReviewQueue(prev => prev.slice(1));
+        } else {
+            // All questions completed
+            setIsComplete(true);
+        }
+    };
+    
+    return (
+        <div className="max-w-2xl mx-auto p-6">
+            {!isComplete ? (
+                <div className="space-y-6">
+                    {/* Progress Bar */}
+                    <div className="bg-gray-200 rounded-full h-2">
+                        <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(currentQuestionIndex + 1) / session?.questions.length * 100}%` }}
+                        />
+                    </div>
+                    
+                    <div className="text-center text-gray-600">
+                        Question {currentQuestionIndex + 1} of {session?.questions.length}
+                        {reviewQueue.length > 0 && (
+                            <span className="ml-2 text-orange-600">
+                                ({reviewQueue.length} to review)
+                            </span>
+                        )}
+                    </div>
+                    
+                    {/* Question Card */}
+                    <div className="bg-white border-2 border-gray-200 rounded-xl p-8 min-h-[400px] flex flex-col justify-center">
+                        <div className="text-lg font-medium mb-6 text-center">
+                            {currentQuestion?.question}
+                        </div>
+                        
+                        {!showAnswer ? (
+                            <button
+                                onClick={() => setShowAnswer(true)}
+                                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 self-center"
+                            >
+                                Show Model Answer
+                            </button>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <div className="text-gray-800 leading-relaxed">
+                                        {currentQuestion?.model_answer}
+                                    </div>
+                                </div>
+                                
+                                {/* Confidence Buttons */}
+                                <div className="space-y-3">
+                                    <div className="text-center text-sm text-gray-600 mb-3">
+                                        How confident do you feel about this question?
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        <button
+                                            onClick={() => markConfidence(3)}
+                                            className="bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600"
+                                        >
+                                            ✓ Confident - I know this well
+                                        </button>
+                                        <button
+                                            onClick={() => markConfidence(2)}
+                                            className="bg-yellow-500 text-white px-4 py-3 rounded-lg hover:bg-yellow-600"
+                                        >
+                                            ~ Somewhat Confident - Could be better
+                                        </button>
+                                        <button
+                                            onClick={() => markConfidence(1)}
+                                            className="bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600"
+                                        >
+                                            ✗ Not Confident - Need to review this
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ) : (
+                <CompletionSummary sessionId={sessionId} />
+            )}
+        </div>
+    );
+};
+```
+
+#### Completion Summary Component
+```javascript
+// CompletionSummary.jsx
+const CompletionSummary = ({ sessionId }) => {
+    const [summary, setSummary] = useState(null);
+    
+    useEffect(() => {
+        fetch(`/api/qa/session/${sessionId}/complete`, { method: 'POST' })
+            .then(res => res.json())
+            .then(setSummary);
+    }, [sessionId]);
+    
+    return (
+        <div className="text-center space-y-6">
+            <div className="text-3xl">🎉</div>
+            <h2 className="text-2xl font-bold text-green-600">Session Complete!</h2>
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <h3 className="font-semibold mb-4">Your Progress Summary</h3>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="bg-green-50 p-3 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                            {summary?.final_mastery.confident}
+                        </div>
+                        <div className="text-sm text-green-700">Confident</div>
+                    </div>
+                    <div className="bg-yellow-50 p-3 rounded-lg">
+                        <div className="text-2xl font-bold text-yellow-600">
+                            {summary?.final_mastery.somewhat_confident}
+                        </div>
+                        <div className="text-sm text-yellow-700">Somewhat</div>
+                    </div>
+                    <div className="bg-red-50 p-3 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                            {summary?.final_mastery.not_confident}
+                        </div>
+                        <div className="text-sm text-red-700">Need Review</div>
+                    </div>
+                </div>
+                <div className="mt-4 text-gray-600">
+                    Total attempts: {summary?.total_attempts}
+                </div>
+            </div>
+            <div className="space-y-2">
+                <button
+                    onClick={() => navigate('/qa/new')}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                >
+                    Generate New Q&A Session
+                </button>
+                <button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 ml-3"
+                >
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+    );
+};
+```
+
+### 5. Implementation Steps
+
+#### Phase 1: Setup & Database
+1. Create database tables for Q&A sessions, questions, and progress
+2. Set up basic API routes for session management
+3. Test database operations
+
+#### Phase 2: Question Generation
+1. Implement ChatGPT integration for Q&A generation
+2. Create job description parsing logic
+3. Test with various job descriptions
+4. Validate question quality and relevance
+
+#### Phase 3: Flashcard Interface
+1. Build job description input form
+2. Create flashcard display component
+3. Implement show/hide answer functionality
+4. Add confidence rating system
+
+#### Phase 4: Spaced Repetition
+1. Implement review queue logic
+2. Create progress tracking system
+3. Build completion summary
+4. Test full user journey
+
+#### Phase 5: Polish & Optimization
+1. Add loading states and error handling
+2. Improve UI/UX design
+3. Add progress persistence
+4. Implement session history
+
+### 6. Key Features
+
+#### Smart Question Generation
+- Analyzes job description content
+- Generates role-specific questions
+- Includes model answers with examples
+- Covers NHS values and competencies
+
+#### Duolingo-Style Learning
+- One question at a time
+- Hidden answers until revealed
+- Confidence-based progression
+- Automatic review of difficult questions
+
+#### Progress Tracking
+- Real-time progress indicators
+- Confidence level statistics
+- Session completion summary
+- Historical session data
+
+### 7. User Experience Flow
+
+1. **Input**: Paste job description → Generate questions
+2. **Study**: Question → Show answer → Rate confidence
+3. **Review**: Repeat low-confidence questions automatically
+4. **Complete**: Summary of mastery levels
+5. **Repeat**: Option to create new sessions
+
+### 8. Important Disclaimer Implementation
+
+```javascript
+const DisclaimerBanner = () => (
+    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+        <div className="flex items-start">
+            <div className="text-amber-600 mr-2 text-xl">⚠️</div>
+            <div>
+                <div className="font-semibold text-amber-800 mb-1">
+                    Important Notice
+                </div>
+                <div className="text-amber-700 text-sm">
+                    We cannot predict the exact questions you'll be asked in your interview. 
+                    These AI-generated questions are based on your job description and designed 
+                    to help you practice common healthcare interview themes and develop strong responses.
+                </div>
+            </div>
+        </div>
+    </div>
+);
+```
+
+## Success Metrics
+
+- **Engagement**: Time spent per session, completion rates
+- **Learning**: Improvement in confidence levels over time
+- **Usage**: Number of sessions created, questions reviewed
+- **Satisfaction**: User feedback on question relevance and quality

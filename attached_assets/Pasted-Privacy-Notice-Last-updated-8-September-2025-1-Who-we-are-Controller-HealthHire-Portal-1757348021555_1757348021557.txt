@@ -1,0 +1,73 @@
+Privacy Notice
+
+Last updated: 8 September 2025
+
+1) Who we are
+
+Controller:🔷 HealthHire Portal (trading as HealthHire UK**)
+Registered office: 🔷 52 Carr Side Crescent • Company no: 🔷15454323
+Email: hello@healthhireportal.com
+
+We provide an online toolkit to help applicants prepare NHS job applications (profile/CV, Supporting Information & cover letters with “Henry the Helper”, interview practice, job tracking, resources, and job search & saves).
+
+2) The data we collect
+
+Account & profile: name, email, location, role preferences, experience, education, skills, uploaded CVs/documents.
+Content you provide : Supporting Information, cover letters, interview practice answers, notes, job tracker entries.
+Usage & device: pages used, actions taken, timestamps, IP address, browser/device type (for security and service improvement).
+Payments: we receive payment confirmation and metadata from our payment processor.
+Referrals & communications: who invited you, your marketing preferences, messages you send to us.
+
+3) How we use your data (and lawful bases)
+
+Provide the service (create/maintain your account; generate documents; save jobs; track progress) 
+Paid access & billing - Legal obligation (tax records).
+Support & service messages (password reset, critical updates)
+Improve and secure the platform (troubleshooting, analytics, preventing misuse)
+Optional updates & tips** (newsletters, offers) (you can withdraw anytime).
+
+About “Henry the Helper”: We use automated tools to help draft and improve your application content based on the information you provide. This is assistance only; we do not make decisions with legal or similarly significant effects based solely on automated processing.
+
+4) Who we share data with (processors)
+
+We use trusted service providers to run the portal. They only process your data under our instructions:
+
+Hosting & infrastructure: 🔷 Replit
+Payments: 🔷 Stripe
+Email & notifications: 🔷 Outlook
+Automated drafting/model provider: 🔷 Google (Gemini)
+
+We don’t sell your personal data.
+
+5) How long we keep data
+
+Account & profile: for as long as your account is active.
+Generated documents & tracker entries: until you delete them or close your account.
+Support tickets: up to 24 months after closure.
+Technical logs: up to 12 months for security and troubleshooting.
+Billing records: 6 years (legal requirement).
+
+We delete or anonymise data after these periods.
+
+ 6) Your rights
+
+You can access**, correct**, **delete**, or **download** your data; **restrict** or **object** to certain processing; and **withdraw consent** (for marketing) at any time.
+To exercise your rights, email us using email at top of this notice or adjust your privacy notice.
+You can also complain to the **Information Commissioner’s Office (ICO)** if you are unhappy with how we handle your data (see **ico.org.uk**).
+
+7) Cookies
+
+We use **essential cookies** to run the site and (with your consent) **optional cookies** for analytics and improvements. You can change your choices anytime in the cookie settings.
+
+
+8) Security
+
+We use appropriate technical and organisational measures to keep your data secure, including encryption in transit, access controls, secret management, and abuse/threat monitoring. You’re responsible for keeping your login details confidential.
+
+9) Children
+
+Our service is for users **aged 16+**. If you believe a child has used the service, contact us via the email at the top of this notice
+
+10) Changes to this notice
+
+We’ll post any updates on this page and change the “Last updated” date above. If changes are significant, we’ll let you know by email or in-app.

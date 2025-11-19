@@ -1,0 +1,1543 @@
+# GDPR Compliance & Security Implementation Guide
+
+## Overview
+Comprehensive implementation of GDPR compliance and enhanced security measures for the healthcare job platform, covering data protection, user rights, security controls, and legal requirements.
+
+## GDPR Compliance Requirements
+
+### 1. Legal Basis & Data Processing
+
+#### Database Schema for GDPR Compliance
+```sql
+-- GDPR Consent Management
+CREATE TABLE gdpr_consents (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    consent_type VARCHAR(100), -- 'marketing', 'analytics', 'ai_processing', 'essential'
+    legal_basis VARCHAR(50), -- 'consent', 'legitimate_interest', 'contract', 'legal_obligation'
+    consent_given BOOLEAN,
+    consent_date TIMESTAMP,
+    consent_withdrawn_date TIMESTAMP NULL,
+    consent_version VARCHAR(20), -- Track policy version
+    ip_address INET,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Data Processing Records (Article 30)
+CREATE TABLE processing_activities (
+    id PRIMARY KEY,
+    activity_name VARCHAR(255),
+    purpose TEXT,
+    legal_basis VARCHAR(50),
+    data_categories TEXT[], -- ['personal_data', 'special_category', 'criminal']
+    data_subjects TEXT[], -- ['users', 'job_seekers', 'healthcare_professionals']
+    recipients TEXT[], -- Who data is shared with
+    retention_period INTEGER, -- In days
+    security_measures TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Data Subject Requests (Article 15-22)
+CREATE TABLE data_subject_requests (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    request_type VARCHAR(50), -- 'access', 'rectification', 'erasure', 'portability', 'restriction', 'objection'
+    request_details TEXT,
+    status VARCHAR(20) DEFAULT 'pending', -- 'pending', 'in_progress', 'completed', 'rejected'
+    submitted_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_date TIMESTAMP NULL,
+    admin_notes TEXT,
+    verification_method VARCHAR(100),
+    response_data JSONB -- Store the response for audit
+);
+
+-- Data Breach Log (Article 33-34)
+CREATE TABLE data_breaches (
+    id PRIMARY KEY,
+    breach_type VARCHAR(100),
+    description TEXT,
+    affected_users INTEGER,
+    data_categories TEXT[],
+    risk_level VARCHAR(20), -- 'low', 'medium', 'high'
+    discovered_date TIMESTAMP,
+    contained_date TIMESTAMP NULL,
+    authority_notified BOOLEAN DEFAULT FALSE,
+    authority_notification_date TIMESTAMP NULL,
+    users_notified BOOLEAN DEFAULT FALSE,
+    user_notification_date TIMESTAMP NULL,
+    remedial_actions TEXT,
+    status VARCHAR(20) DEFAULT 'open' -- 'open', 'investigating', 'contained', 'closed'
+);
+
+-- Audit Trail for Data Access
+CREATE TABLE data_access_logs (
+    id PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    accessed_by INTEGER REFERENCES users(id), -- Staff member who accessed data
+    access_type VARCHAR(50), -- 'view', 'edit', 'delete', 'export'
+    data_type VARCHAR(100), -- 'profile', 'cv', 'applications', 'interview_data'
+    ip_address INET,
+    user_agent TEXT,
+    purpose TEXT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 2. User Rights Implementation
+
+#### Data Subject Access Request (Article 15)
+```javascript
+// routes/gdpr.js
+const GDPRController = {
+    
+    // Submit Data Access Request
+    async submitAccessRequest(req, res) {
+        const userId = req.user.id;
+        
+        try {
+            // Create request record
+            const request = await db.query(`
+                INSERT INTO data_subject_requests 
+                (user_id, request_type, request_details, verification_method)
+                VALUES (?, 'access', 'User requested access to all personal data', 'authenticated_session')
+                RETURNING *
+            `, [userId]);
+            
+            // Send confirmation email
+            await this.sendRequestConfirmation(userId, 'access', request[0].id);
+            
+            res.json({
+                success: true,
+                message: 'Your data access request has been submitted.',
+                reference_id: request[0].id,
+                expected_completion: '30 days from submission'
+            });
+            
+        } catch (error) {
+            console.error('Access request error:', error);
+            res.status(500).json({ error: 'Failed to submit request' });
+        }
+    },
+    
+    // Generate Data Export (for completed access requests)
+    async generateDataExport(userId) {
+        const userData = {
+            personal_information: await this.getUserPersonalData(userId),
+            account_information: await this.getUserAccountData(userId),
+            application_data: await this.getUserApplications(userId),
+            cv_data: await this.getUserCVs(userId),
+            interview_practice_data: await this.getUserInterviewData(userId),
+            ai_interactions: await this.getUserAIInteractions(userId),
+            consent_history: await this.getUserConsentHistory(userId),
+            login_history: await this.getUserLoginHistory(userId, 90), // Last 90 days
+            processing_purposes: await this.getProcessingPurposes(),
+            data_retention: await this.getRetentionPeriods(),
+            third_party_sharing: await this.getThirdPartySharing()
+        };
+        
+        return {
+            export_date: new Date().toISOString(),
+            data: userData,
+            format: 'JSON',
+            note: 'This export contains all personal data we process about you.'
+        };
+    },
+    
+    // Data Rectification (Article 16)
+    async handleRectificationRequest(req, res) {
+        const { field, current_value, requested_value, reason } = req.body;
+        const userId = req.user.id;
+        
+        try {
+            const request = await db.query(`
+                INSERT INTO data_subject_requests 
+                (user_id, request_type, request_details)
+                VALUES (?, 'rectification', ?)
+                RETURNING *
+            `, [userId, JSON.stringify({ field, current_value, requested_value, reason })]);
+            
+            res.json({
+                success: true,
+                message: 'Rectification request submitted for review.',
+                reference_id: request[0].id
+            });
+            
+        } catch (error) {
+            res.status(500).json({ error: 'Failed to submit rectification request' });
+        }
+    },
+    
+    // Right to Erasure (Article 17)
+    async handleErasureRequest(req, res) {
+        const { reason, specific_data } = req.body;
+        const userId = req.user.id;
+        
+        try {
+            // Check for legitimate grounds for erasure
+            const canErase = await this.validateErasureRequest(userId, reason);
+            
+            if (!canErase.allowed) {
+                return res.json({
+                    success: false,
+                    message: 'Erasure request cannot be fulfilled',
+                    reason: canErase.reason,
+                    can_appeal: true
+                });
+            }
+            
+            const request = await db.query(`
+                INSERT INTO data_subject_requests 
+                (user_id, request_type, request_details)
+                VALUES (?, 'erasure', ?)
+                RETURNING *
+            `, [userId, JSON.stringify({ reason, specific_data })]);
+            
+            res.json({
+                success: true,
+                message: 'Erasure request submitted for processing.',
+                reference_id: request[0].id,
+                note: 'Account deletion will be processed within 30 days.'
+            });
+            
+        } catch (error) {
+            res.status(500).json({ error: 'Failed to submit erasure request' });
+        }
+    },
+    
+    // Data Portability (Article 20)
+    async handlePortabilityRequest(req, res) {
+        const userId = req.user.id;
+        
+        try {
+            // Generate portable data export
+            const portableData = await this.generatePortableExport(userId);
+            
+            const request = await db.query(`
+                INSERT INTO data_subject_requests 
+                (user_id, request_type, status, response_data)
+                VALUES (?, 'portability', 'completed', ?)
+                RETURNING *
+            `, [userId, JSON.stringify(portableData)]);
+            
+            res.json({
+                success: true,
+                data: portableData,
+                format: 'structured_json',
+                note: 'This data is provided in a commonly used, machine-readable format.'
+            });
+            
+        } catch (error) {
+            res.status(500).json({ error: 'Failed to generate portable data' });
+        }
+    }
+};
+```
+
+### 3. Consent Management System
+
+#### Granular Consent Implementation
+```javascript
+// components/ConsentManager.jsx
+const ConsentManager = ({ userId }) => {
+    const [consents, setConsents] = useState({});
+    const [showDetails, setShowDetails] = useState(false);
+    
+    const consentTypes = {
+        essential: {
+            name: 'Essential Cookies & Data Processing',
+            description: 'Required for basic platform functionality, account management, and security.',
+            required: true,
+            legal_basis: 'legitimate_interest'
+        },
+        analytics: {
+            name: 'Analytics & Performance',
+            description: 'Help us understand how you use our platform to improve your experience.',
+            required: false,
+            legal_basis: 'consent'
+        },
+        ai_processing: {
+            name: 'AI Content Generation',
+            description: 'Process your data with ChatGPT to generate CVs, interview questions, and feedback.',
+            required: false,
+            legal_basis: 'consent'
+        },
+        marketing: {
+            name: 'Marketing Communications',
+            description: 'Send you job alerts, platform updates, and relevant career opportunities.',
+            required: false,
+            legal_basis: 'consent'
+        },
+        profiling: {
+            name: 'Job Matching & Profiling',
+            description: 'Create profiles to suggest relevant jobs and improve recommendations.',
+            required: false,
+            legal_basis: 'consent'
+        }
+    };
+    
+    const updateConsent = async (consentType, granted) => {
+        try {
+            await fetch('/api/gdpr/consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    consent_type: consentType,
+                    consent_given: granted,
+                    legal_basis: consentTypes[consentType].legal_basis
+                })
+            });
+            
+            setConsents(prev => ({
+                ...prev,
+                [consentType]: granted
+            }));
+            
+        } catch (error) {
+            console.error('Failed to update consent:', error);
+        }
+    };
+    
+    return (
+        <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold">Privacy Preferences</h3>
+                <button
+                    onClick={() => setShowDetails(!showDetails)}
+                    className="text-blue-600 text-sm hover:underline"
+                >
+                    {showDetails ? 'Hide Details' : 'Show Details'}
+                </button>
+            </div>
+            
+            <div className="space-y-4">
+                {Object.entries(consentTypes).map(([key, consent]) => (
+                    <div key={key} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1">
+                                <h4 className="font-medium">{consent.name}</h4>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {consent.description}
+                                </p>
+                                {showDetails && (
+                                    <div className="mt-2 text-xs text-gray-500">
+                                        Legal basis: {consent.legal_basis.replace('_', ' ')}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="ml-4">
+                                {consent.required ? (
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                        Required
+                                    </span>
+                                ) : (
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={consents[key] || false}
+                                            onChange={(e) => updateConsent(key, e.target.checked)}
+                                            className="mr-2"
+                                        />
+                                        <span className="text-sm">Allow</span>
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <div className="text-sm text-blue-800">
+                    <strong>Your Rights:</strong> You can change these preferences at any time. 
+                    You also have the right to access, rectify, erase, or port your data. 
+                    <a href="/privacy/rights" className="underline ml-1">Learn more</a>
+                </div>
+            </div>
+        </div>
+    );
+};
+```
+
+### 4. Data Protection & Security Controls
+
+#### Enhanced Security Implementation
+```javascript
+// security/dataProtection.js
+const DataProtection = {
+    
+    // Data Encryption at Rest
+    encryptSensitiveData: {
+        // Encrypt PII fields
+        encryptPII(data) {
+            const crypto = require('crypto');
+            const algorithm = 'aes-256-gcm';
+            const key = process.env.ENCRYPTION_KEY;
+            
+            const iv = crypto.randomBytes(16);
+            const cipher = crypto.createCipher(algorithm, key, iv);
+            
+            let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            
+            const authTag = cipher.getAuthTag();
+            
+            return {
+                encrypted: encrypted,
+                iv: iv.toString('hex'),
+                authTag: authTag.toString('hex')
+            };
+        },
+        
+        // Decrypt PII fields
+        decryptPII(encryptedData) {
+            const crypto = require('crypto');
+            const algorithm = 'aes-256-gcm';
+            const key = process.env.ENCRYPTION_KEY;
+            
+            const decipher = crypto.createDecipher(
+                algorithm, 
+                key, 
+                Buffer.from(encryptedData.iv, 'hex')
+            );
+            decipher.setAuthTag(Buffer.from(encryptedData.authTag, 'hex'));
+            
+            let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+            
+            return JSON.parse(decrypted);
+        }
+    },
+    
+    // Data Minimisation
+    dataMinimisation: {
+        // Only collect necessary data
+        validateDataCollection(userData, purpose) {
+            const necessaryFields = {
+                'registration': ['email', 'name', 'profession'],
+                'job_application': ['cv', 'cover_letter', 'contact_details'],
+                'interview_practice': ['responses', 'session_data'],
+                'ai_generation': ['input_data', 'preferences']
+            };
+            
+            const required = necessaryFields[purpose] || [];
+            const collected = Object.keys(userData);
+            
+            // Remove unnecessary data
+            return Object.fromEntries(
+                Object.entries(userData).filter(([key]) => required.includes(key))
+            );
+        }
+    },
+    
+    // Access Controls
+    accessControls: {
+        // Role-based access control
+        async checkDataAccess(accessorId, targetUserId, dataType, operation) {
+            const accessor = await getUserRole(accessorId);
+            
+            // Users can access their own data
+            if (accessorId === targetUserId) {
+                return { allowed: true, reason: 'data_subject' };
+            }
+            
+            // Admin access controls
+            if (accessor.role === 'admin') {
+                await this.logDataAccess(accessorId, targetUserId, dataType, operation);
+                return { allowed: true, reason: 'admin_access' };
+            }
+            
+            // Support staff limited access
+            if (accessor.role === 'support' && operation === 'view') {
+                await this.logDataAccess(accessorId, targetUserId, dataType, operation);
+                return { allowed: true, reason: 'support_access' };
+            }
+            
+            return { allowed: false, reason: 'insufficient_permissions' };
+        },
+        
+        async logDataAccess(accessorId, targetUserId, dataType, operation) {
+            await db.query(`
+                INSERT INTO data_access_logs 
+                (user_id, accessed_by, access_type, data_type, ip_address, user_agent)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `, [targetUserId, accessorId, operation, dataType, req.ip, req.get('user-agent')]);
+        }
+    }
+};
+```
+
+### 5. Data Retention & Deletion
+
+#### Automated Data Lifecycle Management
+```javascript
+// jobs/dataRetention.js
+const DataRetentionJob = {
+    
+    // Retention periods (in days)
+    retentionPeriods: {
+        'inactive_accounts': 1095,        // 3 years
+        'application_data': 2555,         // 7 years (legal requirement)
+        'session_logs': 365,              // 1 year
+        'ai_interaction_logs': 730,       // 2 years
+        'marketing_data': 1095,           // 3 years
+        'analytics_data': 1460,           // 4 years
+        'deleted_account_logs': 2555      // 7 years (for legal compliance)
+    },
+    
+    async runRetentionCheck() {
+        console.log('Starting data retention check...');
+        
+        try {
+            // Check each data category
+            for (const [category, retentionDays] of Object.entries(this.retentionPeriods)) {
+                await this.processCategory(category, retentionDays);
+            }
+            
+            // Generate retention report
+            await this.generateRetentionReport();
+            
+        } catch (error) {
+            console.error('Data retention job failed:', error);
+            await this.notifyAdmins('Data retention job failed', error.message);
+        }
+    },
+    
+    async processCategory(category, retentionDays) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+        
+        switch (category) {
+            case 'inactive_accounts':
+                await this.deleteInactiveAccounts(cutoffDate);
+                break;
+            case 'session_logs':
+                await this.deleteOldSessionLogs(cutoffDate);
+                break;
+            case 'ai_interaction_logs':
+                await this.deleteOldAILogs(cutoffDate);
+                break;
+            // ... other categories
+        }
+    },
+    
+    async deleteInactiveAccounts(cutoffDate) {
+        // Find inactive accounts without recent consent
+        const inactiveUsers = await db.query(`
+            SELECT u.id, u.email 
+            FROM users u
+            LEFT JOIN user_sessions s ON u.id = s.user_id
+            WHERE u.last_login < ? 
+            AND (
+                SELECT COUNT(*) FROM gdpr_consents gc 
+                WHERE gc.user_id = u.id AND gc.consent_given = true
+            ) = 0
+            GROUP BY u.id
+        `, [cutoffDate]);
+        
+        for (const user of inactiveUsers) {
+            await this.performAccountDeletion(user.id, 'automatic_retention');
+        }
+    },
+    
+    async performAccountDeletion(userId, reason) {
+        const transaction = await db.beginTransaction();
+        
+        try {
+            // 1. Export user data for legal retention
+            const userData = await this.createDeletionRecord(userId);
+            
+            // 2. Delete user data in correct order (foreign key constraints)
+            await db.query('DELETE FROM ai_usage_tracking WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM interview_sessions WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM qa_sessions WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM user_cvs WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM job_applications WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM gdpr_consents WHERE user_id = ?', [userId]);
+            await db.query('DELETE FROM user_sessions WHERE user_id = ?', [userId]);
+            
+            // 3. Anonymize user record (keep for legal/audit purposes)
+            await db.query(`
+                UPDATE users SET 
+                    email = CONCAT('deleted_user_', id, '@anonymized.local'),
+                    first_name = 'Deleted',
+                    last_name = 'User',
+                    phone = NULL,
+                    date_of_birth = NULL,
+                    address = NULL,
+                    deleted_at = CURRENT_TIMESTAMP,
+                    deletion_reason = ?
+                WHERE id = ?
+            `, [reason, userId]);
+            
+            await transaction.commit();
+            console.log(`Account ${userId} deleted successfully`);
+            
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+};
+
+// Schedule retention job to run daily
+const cron = require('node-cron');
+cron.schedule('0 2 * * *', () => {  // 2 AM daily
+    DataRetentionJob.runRetentionCheck();
+});
+```
+
+### 6. Privacy by Design Implementation
+
+#### Privacy-First Architecture
+```javascript
+// middleware/privacyByDesign.js
+const PrivacyMiddleware = {
+    
+    // Data minimization middleware
+    dataMinimization: (req, res, next) => {
+        // Strip unnecessary headers
+        delete req.headers['x-forwarded-for-chain'];
+        delete req.headers['x-real-ip-chain'];
+        
+        // Limit data collection
+        if (req.body && typeof req.body === 'object') {
+            req.body = DataProtection.dataMinimisation.validateDataCollection(
+                req.body, 
+                req.route?.purpose || 'general'
+            );
+        }
+        
+        next();
+    },
+    
+    // Purpose limitation
+    purposeLimitation: (purpose) => (req, res, next) => {
+        req.dataPurpose = purpose;
+        
+        // Log data processing purpose
+        console.log(`Data processed for purpose: ${purpose}`, {
+            user: req.user?.id,
+            endpoint: req.path,
+            method: req.method
+        });
+        
+        next();
+    },
+    
+    // Anonymization for analytics
+    anonymizeForAnalytics: (data) => {
+        return {
+            timestamp: data.timestamp,
+            action: data.action,
+            feature_used: data.feature_used,
+            session_duration: data.session_duration,
+            user_type: data.user_type, // 'job_seeker', 'recruiter', etc.
+            // Remove all PII
+            user_id_hash: crypto.createHash('sha256').update(data.user_id.toString()).digest('hex').substring(0, 8)
+        };
+    }
+};
+```
+
+### 7. Cookie Consent & Tracking
+
+#### GDPR-Compliant Cookie Management
+```javascript
+// components/CookieConsent.jsx
+const CookieConsent = () => {
+    const [showBanner, setShowBanner] = useState(false);
+    const [showPreferences, setShowPreferences] = useState(false);
+    const [preferences, setPreferences] = useState({
+        essential: true,    // Always true
+        analytics: false,
+        marketing: false,
+        personalization: false
+    });
+    
+    useEffect(() => {
+        // Check if user has already given consent
+        const consent = localStorage.getItem('cookie_consent');
+        if (!consent) {
+            setShowBanner(true);
+        } else {
+            setPreferences(JSON.parse(consent));
+            applyCookieSettings(JSON.parse(consent));
+        }
+    }, []);
+    
+    const acceptAll = () => {
+        const allConsents = {
+            essential: true,
+            analytics: true,
+            marketing: true,
+            personalization: true
+        };
+        
+        saveConsent(allConsents);
+        setShowBanner(false);
+    };
+    
+    const acceptEssential = () => {
+        const essentialOnly = {
+            essential: true,
+            analytics: false,
+            marketing: false,
+            personalization: false
+        };
+        
+        saveConsent(essentialOnly);
+        setShowBanner(false);
+    };
+    
+    const savePreferences = () => {
+        saveConsent(preferences);
+        setShowPreferences(false);
+        setShowBanner(false);
+    };
+    
+    const saveConsent = async (consents) => {
+        // Save locally
+        localStorage.setItem('cookie_consent', JSON.stringify(consents));
+        
+        // Save to server
+        if (user?.id) {
+            await fetch('/api/gdpr/cookie-consent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(consents)
+            });
+        }
+        
+        // Apply settings
+        applyCookieSettings(consents);
+    };
+    
+    const applyCookieSettings = (consents) => {
+        // Google Analytics
+        if (consents.analytics) {
+            window.gtag('consent', 'update', {
+                analytics_storage: 'granted'
+            });
+        }
+        
+        // Marketing cookies
+        if (consents.marketing) {
+            window.gtag('consent', 'update', {
+                ad_storage: 'granted'
+            });
+        }
+        
+        // Personalization
+        if (!consents.personalization) {
+            // Disable personalization features
+            document.cookie = 'personalization=disabled; path=/; secure; samesite=strict';
+        }
+    };
+    
+    if (!showBanner && !showPreferences) return null;
+    
+    return (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg z-50">
+            {showBanner && !showPreferences && (
+                <div className="p-4 max-w-7xl mx-auto">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1">
+                            <h3 className="font-semibold mb-2">We use cookies</h3>
+                            <p className="text-sm text-gray-600">
+                                We use essential cookies for basic functionality and optional cookies to improve your experience. 
+                                You can choose which cookies to accept.{' '}
+                                <a href="/privacy/cookies" className="text-blue-600 hover:underline">
+                                    Learn more
+                                </a>
+                            </p>
+                        </div>
+                        <div className="flex gap-3 flex-wrap">
+                            <button
+                                onClick={() => setShowPreferences(true)}
+                                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm"
+                            >
+                                Manage Preferences
+                            </button>
+                            <button
+                                onClick={acceptEssential}
+                                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm"
+                            >
+                                Essential Only
+                            </button>
+                            <button
+                                onClick={acceptAll}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                            >
+                                Accept All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {showPreferences && (
+                <CookiePreferences 
+                    preferences={preferences}
+                    setPreferences={setPreferences}
+                    onSave={savePreferences}
+                    onCancel={() => setShowPreferences(false)}
+                />
+            )}
+        </div>
+    );
+};
+```
+
+### 8. Breach Detection & Response
+
+#### Automated Breach Detection
+```javascript
+// security/breachDetection.js
+const BreachDetection = {
+    
+    // Monitor for suspicious activities
+    async monitorSuspiciousActivity() {
+        const checks = [
+            this.checkMultipleFailedLogins(),
+            this.checkUnusualDataAccess(),
+            this.checkDataExfiltration(),
+            this.checkUnauthorizedAccess(),
+            this.checkSystemAnomalies()
+        ];
+        
+        const results = await Promise.all(checks);
+        const incidents = results.filter(result => result.breach_detected);
+        
+        for (const incident of incidents) {
+            await this.handlePotentialBreach(incident);
+        }
+    },
+    
+    async handlePotentialBreach(incident) {
+        // 1. Log the incident
+        const breachRecord = await db.query(`
+            INSERT INTO data_breaches 
+            (breach_type, description, risk_level, discovered_date, status)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP, 'open')
+            RETURNING *
+        `, [incident.type, incident.description, incident.risk_level]);
+        
+        // 2. Immediate containment for high-risk breaches
+        if (incident.risk_level === 'high') {
+            await this.immediateContainment(incident);
+        }
+        
+        // 3. Assess impact
+        const impact = await this.assessBreachImpact(incident);
+        
+        // 4. Determine notification requirements
+        const notifications = await this.determineNotificationRequirements(impact);
+        
+        // 5. Execute response plan
+        await this.executeBrResponse(breachRecord[0], impact, notifications);
+    },
+    
+    async assessBreachImpact(incident) {
+        return {
+            affected_users: incident.affected_users || 0,
+            data_categories: incident.data_categories || [],
+            severity: incident.risk_level,
+            requires_authority_notification: incident.risk_level === 'high' || incident.affected_users > 100,
+            requires_user_notification: incident.risk_level === 'high' && incident.data_categories.includes('sensitive')
+        };
+    },
+    
+    async executeBrResponse(breachRecord, impact, notifications) {
+        // Notify ICO if required (within 72 hours)
+        if (notifications.authority_required) {
+            await this.notifyDataProtectionAuthority(breachRecord, impact);
+        }
+        
+        // Notify affected users if required (without undue delay)
+        if (notifications.users_required) {
+            await this.notifyAffectedUsers(breachRecord, impact);
+        }
+        
+        // Internal notifications
+        await this.notifySecurityTeam(breachRecord, impact);
+        await this.notifyLegalTeam(breachRecord, impact);
+    }
+};
+```
+
+## Implementation Checklist
+
+### Phase 1: Legal Foundation (Week 1-2)
+- [ ] Create GDPR database tables and schema
+- [ ] Implement consent management system
+- [ ] Update privacy policy and terms of service
+- [ ] Create cookie policy and banner
+- [ ] Set up data processing records (Article 30)
+- [ ] Establish legal basis for all data processing activities
+- [ ] Create Data Protection Impact Assessment (DPIA) documentation
+
+### Phase 2: User Rights Implementation (Week 3-4)
+- [ ] Build data subject access request system
+- [ ] Implement data rectification process
+- [ ] Create data erasure/deletion functionality
+- [ ] Build data portability export system
+- [ ] Set up consent withdrawal mechanism
+- [ ] Create user-facing privacy dashboard
+- [ ] Test all user rights workflows
+
+### Phase 3: Security Controls (Week 5-6)
+- [ ] Implement data encryption at rest and in transit
+- [ ] Set up access controls and audit logging
+- [ ] Create secure data storage practices
+- [ ] Implement data pseudonymization/anonymization
+- [ ] Set up automated security monitoring
+- [ ] Create incident response procedures
+- [ ] Implement backup encryption and secure deletion
+
+### Phase 4: Data Lifecycle Management (Week 7-8)
+- [ ] Create automated data retention system
+- [ ] Implement data minimization controls
+- [ ] Set up automated deletion processes
+- [ ] Create data archival procedures
+- [ ] Implement purpose limitation controls
+- [ ] Set up data quality monitoring
+- [ ] Create data lifecycle audit trails
+
+### Phase 5: Breach Detection & Response (Week 9-10)
+- [ ] Implement breach detection systems
+- [ ] Create incident response workflows
+- [ ] Set up authority notification procedures
+- [ ] Create user notification systems
+- [ ] Establish breach containment procedures
+- [ ] Create forensic investigation capabilities
+- [ ] Test breach response procedures
+
+### Phase 6: Compliance Monitoring (Week 11-12)
+- [ ] Create compliance dashboard for admins
+- [ ] Set up automated compliance reporting
+- [ ] Implement regular audit procedures
+- [ ] Create staff training programs
+- [ ] Establish third-party vendor assessments
+- [ ] Create ongoing compliance monitoring
+- [ ] Document all processes and procedures
+
+## Advanced Security Features
+
+### 1. Advanced Threat Protection
+
+#### SQL Injection Prevention
+```javascript
+// security/sqlProtection.js
+const SQLProtection = {
+    
+    // Parameterized query enforcement
+    safeQuery: async (query, params = []) => {
+        // Validate query doesn't contain direct string concatenation
+        if (query.includes('${') || query.includes("' +") || query.includes('" +')) {
+            throw new Error('Unsafe query detected - use parameterized queries only');
+        }
+        
+        // Log all database queries for audit
+        console.log('Database Query:', { 
+            query: query.replace(/\?/g, '***'), 
+            timestamp: new Date().toISOString(),
+            user: req.user?.id 
+        });
+        
+        return await db.query(query, params);
+    },
+    
+    // Input sanitization
+    sanitizeInput: (input, type = 'string') => {
+        if (typeof input !== 'string') return input;
+        
+        switch (type) {
+            case 'email':
+                return input.toLowerCase().trim().replace(/[^a-zA-Z0-9@._-]/g, '');
+            case 'name':
+                return input.trim().replace(/[<>\"'&]/g, '');
+            case 'text':
+                return input.trim().replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+            default:
+                return input.trim();
+        }
+    }
+};
+```
+
+#### Rate Limiting & DDoS Protection
+```javascript
+// security/rateLimiting.js
+const rateLimit = require('express-rate-limit');
+const slowDown = require('express-slow-down');
+
+// General API rate limiting
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000, // limit each IP to 1000 requests per windowMs
+    message: {
+        error: 'Too many requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        retry_after: 900 // 15 minutes in seconds
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Strict rate limiting for authentication endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+    skipSuccessfulRequests: true,
+    message: {
+        error: 'Too many authentication attempts',
+        message: 'Account temporarily locked due to multiple failed login attempts.',
+        retry_after: 900
+    }
+});
+
+// AI feature rate limiting (separate from usage monitoring)
+const aiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 20, // 20 requests per minute
+    message: {
+        error: 'AI service rate limit exceeded',
+        message: 'Please wait before making another AI request.'
+    }
+});
+
+// Speed limiting for suspicious behavior
+const speedLimiter = slowDown({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    delayAfter: 100, // allow 100 requests per 15 minutes at full speed
+    delayMs: 500, // slow down subsequent requests by 500ms per request
+    maxDelayMs: 20000, // maximum delay of 20 seconds
+});
+
+module.exports = {
+    generalLimiter,
+    authLimiter,
+    aiLimiter,
+    speedLimiter
+};
+```
+
+### 2. Advanced Encryption & Hashing
+
+#### Multi-Layer Encryption
+```javascript
+// security/encryption.js
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+
+const AdvancedEncryption = {
+    
+    // Field-level encryption for sensitive data
+    encryptField: (data, fieldType = 'general') => {
+        const keys = {
+            general: process.env.GENERAL_ENCRYPTION_KEY,
+            pii: process.env.PII_ENCRYPTION_KEY,
+            financial: process.env.FINANCIAL_ENCRYPTION_KEY,
+            medical: process.env.MEDICAL_ENCRYPTION_KEY
+        };
+        
+        const key = keys[fieldType];
+        const algorithm = 'aes-256-gcm';
+        const iv = crypto.randomBytes(16);
+        
+        const cipher = crypto.createCipher(algorithm, key, iv);
+        let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        
+        const authTag = cipher.getAuthTag();
+        
+        return {
+            encrypted,
+            iv: iv.toString('hex'),
+            authTag: authTag.toString('hex'),
+            algorithm,
+            fieldType
+        };
+    },
+    
+    // Secure password hashing
+    hashPassword: async (password) => {
+        // Validate password strength first
+        if (!this.validatePasswordStrength(password)) {
+            throw new Error('Password does not meet security requirements');
+        }
+        
+        const saltRounds = 14; // High cost factor
+        return await bcrypt.hash(password, saltRounds);
+    },
+    
+    validatePasswordStrength: (password) => {
+        const minLength = 12;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumbers = /\d/.test(password);
+        const hasSymbols = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        const noCommonPatterns = !/(123|abc|password|admin|user)/i.test(password);
+        
+        return password.length >= minLength && 
+               hasUpperCase && 
+               hasLowerCase && 
+               hasNumbers && 
+               hasSymbols && 
+               noCommonPatterns;
+    },
+    
+    // Secure session token generation
+    generateSecureToken: (length = 64) => {
+        return crypto.randomBytes(length).toString('hex');
+    },
+    
+    // Data anonymization
+    anonymizeData: (data, method = 'hash') => {
+        switch (method) {
+            case 'hash':
+                return crypto.createHash('sha256').update(data.toString()).digest('hex');
+            case 'mask':
+                if (typeof data === 'string' && data.includes('@')) {
+                    // Email masking
+                    const [local, domain] = data.split('@');
+                    return local.substring(0, 2) + '***@' + domain;
+                }
+                return data.toString().replace(/./g, '*');
+            case 'remove':
+                return '[REDACTED]';
+            default:
+                return data;
+        }
+    }
+};
+```
+
+### 3. Comprehensive Audit Logging
+
+#### Security Event Logging
+```javascript
+// security/auditLogging.js
+const AuditLogger = {
+    
+    // Log all security-relevant events
+    logSecurityEvent: async (eventType, details) => {
+        const logEntry = {
+            event_type: eventType,
+            timestamp: new Date().toISOString(),
+            user_id: details.user_id || null,
+            ip_address: details.ip_address,
+            user_agent: details.user_agent,
+            session_id: details.session_id,
+            details: details,
+            severity: this.getSeverityLevel(eventType),
+            source: 'security_system'
+        };
+        
+        // Store in secure audit log
+        await db.query(`
+            INSERT INTO security_audit_logs 
+            (event_type, timestamp, user_id, ip_address, user_agent, session_id, details, severity)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            logEntry.event_type,
+            logEntry.timestamp,
+            logEntry.user_id,
+            logEntry.ip_address,
+            logEntry.user_agent,
+            logEntry.session_id,
+            JSON.stringify(logEntry.details),
+            logEntry.severity
+        ]);
+        
+        // Alert on high-severity events
+        if (logEntry.severity === 'HIGH') {
+            await this.alertSecurityTeam(logEntry);
+        }
+    },
+    
+    getSeverityLevel: (eventType) => {
+        const highSeverity = [
+            'failed_login_multiple',
+            'privilege_escalation',
+            'data_access_unauthorized',
+            'suspicious_activity',
+            'potential_breach'
+        ];
+        
+        const mediumSeverity = [
+            'failed_login',
+            'password_change',
+            'data_export',
+            'admin_action'
+        ];
+        
+        if (highSeverity.includes(eventType)) return 'HIGH';
+        if (mediumSeverity.includes(eventType)) return 'MEDIUM';
+        return 'LOW';
+    },
+    
+    // GDPR-compliant audit logging
+    logGDPREvent: async (eventType, userId, details) => {
+        await db.query(`
+            INSERT INTO gdpr_audit_logs 
+            (event_type, user_id, timestamp, details, compliance_status)
+            VALUES (?, ?, CURRENT_TIMESTAMP, ?, 'compliant')
+        `, [eventType, userId, JSON.stringify(details)]);
+    }
+};
+```
+
+### 4. Secure File Upload & Processing
+
+#### File Security Controls
+```javascript
+// security/fileUpload.js
+const FileUploadSecurity = {
+    
+    // Secure file upload validation
+    validateFileUpload: (file, allowedTypes, maxSize = 5 * 1024 * 1024) => {
+        const validations = {
+            size: file.size <= maxSize,
+            type: allowedTypes.includes(file.mimetype),
+            extension: this.validateFileExtension(file.originalname, allowedTypes),
+            content: this.scanFileContent(file.buffer),
+            virus: this.scanForViruses(file.buffer) // If antivirus integration available
+        };
+        
+        const isValid = Object.values(validations).every(v => v === true);
+        
+        return {
+            isValid,
+            validations,
+            sanitizedFilename: this.sanitizeFilename(file.originalname)
+        };
+    },
+    
+    sanitizeFilename: (filename) => {
+        // Remove dangerous characters and limit length
+        return filename
+            .replace(/[^a-zA-Z0-9._-]/g, '')
+            .substring(0, 100)
+            .toLowerCase();
+    },
+    
+    scanFileContent: (buffer) => {
+        // Check for embedded scripts or malicious content
+        const content = buffer.toString('utf8', 0, Math.min(buffer.length, 1024));
+        
+        const maliciousPatterns = [
+            /<script/i,
+            /javascript:/i,
+            /vbscript:/i,
+            /data:text\/html/i,
+            /<?php/i,
+            /<\?=/i
+        ];
+        
+        return !maliciousPatterns.some(pattern => pattern.test(content));
+    },
+    
+    // Secure file storage
+    secureFileStorage: {
+        async storeFile(file, userId, category) {
+            const validation = FileUploadSecurity.validateFileUpload(file, ['application/pdf', 'application/msword']);
+            
+            if (!validation.isValid) {
+                throw new Error('File validation failed');
+            }
+            
+            // Encrypt file before storage
+            const encryptedFile = AdvancedEncryption.encryptField(file.buffer, 'general');
+            
+            // Store metadata
+            const fileRecord = await db.query(`
+                INSERT INTO secure_files 
+                (user_id, original_filename, sanitized_filename, file_size, mime_type, category, 
+                 encryption_info, upload_date, virus_scan_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, 'pending')
+                RETURNING *
+            `, [
+                userId,
+                file.originalname,
+                validation.sanitizedFilename,
+                file.size,
+                file.mimetype,
+                category,
+                JSON.stringify({
+                    algorithm: encryptedFile.algorithm,
+                    iv: encryptedFile.iv,
+                    authTag: encryptedFile.authTag
+                })
+            ]);
+            
+            // Store encrypted file content
+            const filePath = `secure_files/${userId}/${fileRecord[0].id}`;
+            await this.writeEncryptedFile(filePath, encryptedFile.encrypted);
+            
+            // Log file upload
+            await AuditLogger.logSecurityEvent('file_upload', {
+                user_id: userId,
+                file_id: fileRecord[0].id,
+                filename: validation.sanitizedFilename,
+                size: file.size
+            });
+            
+            return fileRecord[0];
+        }
+    }
+};
+```
+
+### 5. Third-Party Integration Security
+
+#### Secure API Integrations
+```javascript
+// security/apiIntegrations.js
+const APISecurityManager = {
+    
+    // Secure ChatGPT integration with privacy controls
+    secureAIIntegration: {
+        async processAIRequest(userData, requestType, userId) {
+            // 1. Data minimization - only send necessary data
+            const minimizedData = this.minimizeDataForAI(userData, requestType);
+            
+            // 2. Pseudonymization - replace identifiable info
+            const pseudonymizedData = this.pseudonymizeData(minimizedData);
+            
+            // 3. Log AI request for audit
+            await AuditLogger.logGDPREvent('ai_processing', userId, {
+                request_type: requestType,
+                data_categories: Object.keys(minimizedData),
+                pseudonymized: true
+            });
+            
+            // 4. Make secure API request
+            const response = await this.secureAPICall('openai', pseudonymizedData);
+            
+            // 5. Log response reception
+            await this.logAIResponse(userId, requestType, response);
+            
+            return response;
+        },
+        
+        minimizeDataForAI: (data, requestType) => {
+            const necessaryFields = {
+                'cv_generation': ['skills', 'experience', 'education', 'job_preferences'],
+                'interview_practice': ['responses', 'job_role', 'experience_level'],
+                'qa_generation': ['job_description', 'role_level'],
+                'cover_letter': ['skills', 'job_description', 'experience_summary']
+            };
+            
+            const required = necessaryFields[requestType] || [];
+            return Object.fromEntries(
+                Object.entries(data).filter(([key]) => required.includes(key))
+            );
+        },
+        
+        pseudonymizeData: (data) => {
+            // Replace names with placeholders
+            const pseudonymized = { ...data };
+            
+            if (pseudonymized.name) {
+                pseudonymized.name = '[CANDIDATE_NAME]';
+            }
+            
+            if (pseudonymized.email) {
+                pseudonymized.email = '[CANDIDATE_EMAIL]';
+            }
+            
+            if (pseudonymized.phone) {
+                pseudonymized.phone = '[CANDIDATE_PHONE]';
+            }
+            
+            if (pseudonymized.address) {
+                pseudonymized.address = '[CANDIDATE_LOCATION]';
+            }
+            
+            return pseudonymized;
+        }
+    },
+    
+    // Secure webhook handling
+    webhookSecurity: {
+        validateWebhook: (req, expectedSignature) => {
+            const signature = req.headers['x-signature-256'];
+            const payload = JSON.stringify(req.body);
+            const expectedSig = crypto
+                .createHmac('sha256', process.env.WEBHOOK_SECRET)
+                .update(payload)
+                .digest('hex');
+            
+            return crypto.timingSafeEqual(
+                Buffer.from(signature, 'hex'),
+                Buffer.from(expectedSig, 'hex')
+            );
+        }
+    }
+};
+```
+
+### 6. Compliance Reporting & Monitoring
+
+#### Automated Compliance Dashboard
+```javascript
+// components/admin/ComplianceDashboard.jsx
+const ComplianceDashboard = () => {
+    const [complianceMetrics, setComplianceMetrics] = useState({});
+    const [auditLogs, setAuditLogs] = useState([]);
+    const [breachAlerts, setBreachAlerts] = useState([]);
+    
+    useEffect(() => {
+        fetchComplianceData();
+        
+        // Auto-refresh every 5 minutes
+        const interval = setInterval(fetchComplianceData, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+    
+    const fetchComplianceData = async () => {
+        try {
+            const [metrics, logs, alerts] = await Promise.all([
+                fetch('/api/admin/compliance/metrics').then(r => r.json()),
+                fetch('/api/admin/compliance/audit-logs').then(r => r.json()),
+                fetch('/api/admin/compliance/breach-alerts').then(r => r.json())
+            ]);
+            
+            setComplianceMetrics(metrics);
+            setAuditLogs(logs);
+            setBreachAlerts(alerts);
+        } catch (error) {
+            console.error('Failed to fetch compliance data:', error);
+        }
+    };
+    
+    return (
+        <div className="space-y-6">
+            <h2 className="text-2xl font-bold">GDPR Compliance Dashboard</h2>
+            
+            {/* Compliance Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <MetricCard 
+                    title="Active Consents"
+                    value={complianceMetrics.active_consents}
+                    color="green"
+                />
+                <MetricCard 
+                    title="Pending DSR"
+                    value={complianceMetrics.pending_requests}
+                    color="yellow"
+                />
+                <MetricCard 
+                    title="Data Breaches (30d)"
+                    value={complianceMetrics.recent_breaches}
+                    color={complianceMetrics.recent_breaches > 0 ? "red" : "green"}
+                />
+                <MetricCard 
+                    title="Compliance Score"
+                    value={`${complianceMetrics.compliance_score}%`}
+                    color={complianceMetrics.compliance_score >= 95 ? "green" : "yellow"}
+                />
+            </div>
+            
+            {/* Breach Alerts */}
+            {breachAlerts.length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-red-800 mb-2">
+                        🚨 Active Security Alerts
+                    </h3>
+                    <div className="space-y-2">
+                        {breachAlerts.map(alert => (
+                            <div key={alert.id} className="text-sm text-red-700">
+                                <strong>{alert.type}:</strong> {alert.description}
+                                <span className="float-right text-xs">
+                                    {new Date(alert.timestamp).toLocaleString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            {/* Recent Audit Events */}
+            <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="font-semibold mb-4">Recent Audit Events</h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {auditLogs.map(log => (
+                        <AuditLogEntry key={log.id} log={log} />
+                    ))}
+                </div>
+            </div>
+            
+            {/* Data Subject Requests */}
+            <DataSubjectRequestsTable />
+            
+            {/* Retention Policy Status */}
+            <RetentionPolicyStatus />
+        </div>
+    );
+};
+```
+
+## Final Security Checklist
+
+### Technical Implementation ✅
+- [ ] Database encryption at rest (AES-256)
+- [ ] TLS 1.3 for all communications
+- [ ] Field-level encryption for sensitive data
+- [ ] Secure password hashing (bcrypt, cost 14+)
+- [ ] SQL injection prevention
+- [ ] XSS protection headers
+- [ ] CSRF tokens
+- [ ] Rate limiting and DDoS protection
+- [ ] Secure file upload validation
+- [ ] Regular security updates and patching
+
+### GDPR Compliance ✅
+- [ ] Lawful basis documentation for all processing
+- [ ] Granular consent management
+- [ ] Data subject rights implementation
+- [ ] Privacy by design architecture
+- [ ] Data minimization controls
+- [ ] Purpose limitation enforcement
+- [ ] Data retention automation
+- [ ] Breach detection and notification
+- [ ] Data Protection Impact Assessments
+- [ ] Staff training and awareness
+
+### Monitoring & Response ✅
+- [ ] Security incident detection
+- [ ] Automated threat monitoring
+- [ ] Compliance dashboard
+- [ ] Audit trail logging
+- [ ] Breach response procedures
+- [ ] Regular security assessments
+- [ ] Vulnerability scanning
+- [ ] Penetration testing schedule
+
+## Ongoing Maintenance
+
+### Monthly Tasks
+- Review and test backup procedures
+- Update security patches
+- Review access controls
+- Audit user permissions
+- Test incident response procedures
+
+### Quarterly Tasks
+- Conduct security risk assessment
+- Review and update privacy policies
+- Test data recovery procedures
+- Security awareness training
+- Compliance audit
+
+### Annual Tasks
+- External security penetration testing
+- GDPR compliance audit
+- Update Data Protection Impact Assessments
+- Review and update incident response plans
+- Security architecture review
+
+This comprehensive implementation provides enterprise-level security and full GDPR compliance for your healthcare job platform, ensuring user data protection while maintaining operational efficiency.

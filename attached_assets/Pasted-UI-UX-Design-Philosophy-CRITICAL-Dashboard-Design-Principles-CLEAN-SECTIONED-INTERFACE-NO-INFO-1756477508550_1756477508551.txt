@@ -1,0 +1,44 @@
+UI/UX Design Philosophy - CRITICAL
+Dashboard Design Principles:
+CLEAN, SECTIONED INTERFACE - NO INFORMATION OVERLOAD
+The main dashboard should be a clean, card-based layout with 7 distinct sections. Each section is a clickable card that reveals its features only when selected. Think Netflix categories or Notion workspace blocks.
+Main Dashboard Layout:
+Header: HealthHire Portal + User Avatar + Progress Ring
+Main Content: 7 Large, Clean Section Cards (2x4 grid or 3x3)
+Footer: Quick stats + Support
+The 7 Core Sections (Each as a Distinct Navigation Area):
+Section 1: "Candidate Profile"
+Card Preview: Profile completion % + "Complete Your Profile"
+Click to reveal: Profile wizard, evidence locker, STAR builder, values assessment
+Section 2: "Job Finder"
+Card Preview: "X new matches" + Search bar preview
+Click to reveal: Smart filters, saved searches, role fit scoring, pay calculator
+Section 3: "Application Documents"
+Card Preview: "Generate tailored applications" + Quick CV/Supporting Info buttons
+Click to reveal: CV generator, Supporting Information generator, cover letters, version control
+Section 4: "Resources Hub"
+Card Preview: "Learn & Prepare" + Featured resource
+Click to reveal: NHS guides, checklists, mini-courses, CPD tracking
+Section 5: "Interview Practice"
+Card Preview: "Practice makes perfect" + Last practice score
+Click to reveal: Mock interviews, feedback engine, practice history, improvement tracking
+Section 6: "Q&A Generator"
+Card Preview: "Get interview-ready" + Generate questions button
+Click to reveal: Role-specific question generation, model answers, practice planner
+Section 7: "Job Tracker & Analytics"
+Card Preview: "X applications in progress" + Success rate %
+Click to reveal: Kanban board, application cards, KPIs, motivational dashboard
+Navigation Behavior:
+
+Main Dashboard: Clean overview with section cards
+Section Pages: Deep dive into that section's tools with breadcrumb back to main
+Within Sections: Sub-navigation tabs if needed, but keep it minimal
+Cross-Section Links: Smart suggestions (e.g., "Generate Supporting Info for this job" from Job Finder)
+
+Visual Design Requirements:
+
+Whitespace-heavy: Breathing room between elements
+Card-based: Each section and feature in defined containers
+Progressive disclosure: Show basics first, reveal complexity on demand
+Clear hierarchy: Main → Section → Feature → Tool
+Minimal cognitive load: One primary action per screen

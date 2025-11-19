@@ -1,0 +1,103 @@
+# Terms of Use
+
+**Last updated:** 8 September 2025
+
+## 1) Who we are
+
+**HealthHire Portal** (run by 🔷 *HealthHire UK “we”, “us”) provides online tools to help applicants prepare NHS job applications (profile/CV, Supporting Information & cover letters with **Henry the Helper**, interview practice, job tracking, resources, and—on paid access—job search & saves).
+**Contact:*hello@healthhireportal.com • Company no.: 15454323
+
+## 2) Acceptance of these terms
+
+By creating an account or using the Portal, you agree to these Terms and our **Privacy Notice** and **Cookie Policy**. If you do not agree, do not use the service.
+
+## 3) Eligibility
+
+You must be **16+**, able to enter a contract, and use the Portal in compliance with UK law and any local laws that apply to you.
+
+## 4) Your account
+
+* Keep your account details accurate and secure; you are responsible for all activity under it.
+* Do not share your login or use someone else’s.
+* Tell us promptly if you suspect unauthorised use: **[info@healthhireuk.com](mailto:info@healthhireuk.com)**.
+
+## 5) Plans & access (Free vs Full Access)
+
+* **Free**: build profile & CV (PDF), Supporting Information & cover letters with limits, interview practice with limits, job tracker, resources, referral.
+* **Full Access (paid one-time unlock)**: everything in Free **plus** job search & saves (and any other gated features we list at checkout).
+* Entitlements are enforced server-side. Attempting to bypass access controls is prohibited.
+
+## 6) Payments & refunds
+
+* Payments are processed by 🔷 *\[Stripe or processor]* in GBP. Prices include VAT where applicable.
+* **One-time purchase** unlocks Full Access. Access starts immediately on payment success.
+* Because access starts straight away, you **agree that we may begin supply immediately** and you **acknowledge losing the 14-day cooling-off right** for digital content that has begun. This does not affect your statutory rights.
+* If we issue a refund (at our discretion or where legally required), we may revoke or adjust entitlements accordingly.
+
+## 7) Fair use & feature limits
+
+To keep the service stable, we apply usage caps (e.g., monthly limits on generations). Hitting “Try again” counts as another generation.
+
+* You must not attempt to exceed, reset, or circumvent limits (including by scripting, multi-accounting, or tampering).
+* If limits are reached or misuse is detected, features may be temporarily blocked. We’ll show an in-product message with the reset time and support contact.
+
+## 8) Henry the Helper (automated drafting)
+
+Henry provides drafting assistance based on information you supply. It **does not** provide legal, clinical, or immigration advice. You are responsible for reviewing, editing, and ensuring your final documents are accurate, appropriate, and compliant with employer policies.
+
+## 9) Your content & our licence
+
+* You keep ownership of content you upload or create (e.g., profile, CV, Supporting Info, interview answers).
+* You grant us a worldwide, non-exclusive, royalty-free licence to **host, process, display, and copy** that content **only to operate and improve** the Portal.
+* You confirm you have rights to the content you upload and that it doesn’t infringe others’ rights.
+
+## 10) Our IP
+
+The Portal, Henry the Helper, text, graphics, logos, and software are our intellectual property or that of our licensors. You must not copy, modify, reverse engineer, or resell any part of the service.
+
+## 11) Acceptable use
+
+Do not use the Portal to:
+
+* break the law; infringe IP; defame; harass; discriminate; or share harmful content;
+* upload malware or attempt to gain unauthorised access;
+* scrape, bulk-download, or mine data;
+* misrepresent your identity, qualifications, or right to work;
+* send unsolicited marketing through our referral features (follow PECR rules—use share-links, not cold emails).
+
+## 12) Privacy, cookies & security
+
+We process personal data as described in our **Privacy Notice**. We use essential and optional cookies (with your consent) as set out in our **Cookie Policy**. We take reasonable technical and organisational measures to secure the service, but no system is perfectly secure.
+
+## 13) Third-party services & links
+
+We rely on third-party providers (e.g., hosting, payments, email, model providers) to run the Portal and may link to third-party sites. We are not responsible for their content or policies.
+
+## 14) Availability & changes
+
+The Portal is provided **“as is” and “as available.”** We may change, suspend, or discontinue features (including beta features) at any time. We’ll try to give reasonable notice of material changes.
+
+## 15) Suspension & termination
+
+We may suspend or close accounts that breach these Terms, present security risks, or engage in misuse. You can close your account at any time via support. After closure, we may retain some records where legally required (see Privacy Notice).
+
+## 16) Disclaimers
+
+* We do not guarantee job outcomes, interview offers, or visas.
+* Guidance and generated text are **assistance only** and may contain errors; you must review and verify all content before use.
+* Nothing here is legal, clinical, or immigration advice.
+
+## 17) Liability
+
+Nothing excludes liability for death or personal injury caused by negligence, fraud, or other liability that cannot be limited by law.
+Subject to that, our total liability to you for all claims arising out of or in connection with the service is limited to the **greater of £100 or the amount you paid to us in the 12 months** before the claim arose. We are not liable for: loss of profits, revenue, data, goodwill; indirect or consequential losses; or issues caused by third-party services outside our control.
+
+## 18) Complaints & disputes
+
+Please contact hello@healthhireportal.com first. These Terms are governed by the laws of **England and Wales**, and the courts of **England and Wales** have exclusive jurisdiction (consumers may also bring claims where they live in the UK, as the law permits).
+
+## 19) Changes to these Terms
+
+We may update these Terms from time to time. We’ll post changes here with a new “Last updated” date and, where changes are significant, notify you by email or in-app.
+
+---
