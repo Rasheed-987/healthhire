@@ -648,7 +648,7 @@ function generateQASessionHTML(sessionData: any): string {
       <!-- Header -->
       <div class="header">
         <div class="title">Interview Practice Q&A</div>
-        <div class="subtitle">${session.jobTitle}</div>
+        <div class="subtitle">${session.sessionName}</div>
         <div class="meta">    
           Generated: ${createdDate} • ${questions.length} Questions
         </div>
