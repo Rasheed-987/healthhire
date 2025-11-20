@@ -3,17 +3,22 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
-  "scripts": {
+"scripts": {
     "dev": "cross-env NODE_ENV=development tsx server/index.ts",
+
     "dev:server": "cross-env NODE_ENV=development tsx server/index.ts",
     "dev:client": "vite --host",
     "dev:full": "concurrently -k -n server,client -c green,cyan \"npm:dev:server\" \"npm:dev:client\"",
-    
-    "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build",
-    "build:server": "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js",
-    
+
+
+    "build": "npm run build-server && npm run build-client",
+
+    "build-server": "esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js",
+
+    "build-client": "cd client && npm install && npm run build && cp -r dist ../dist/client",
+
     "start": "NODE_ENV=production node dist/index.js",
+
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "seed:admin": "tsx server/scripts/seedAdmin.ts --email",
