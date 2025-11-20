@@ -7020,30 +7020,54 @@ browser = await puppeteerLib.launch({
     : ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
 });
 
-      console.log('✅ Browser launched');
       const page = await browser.newPage();
-      console.log('✅ Page created');
 
       // Use domcontentloaded instead of networkidle0 for faster, more reliable loading
       await page.setContent(htmlContent, {
         waitUntil: 'domcontentloaded',
         timeout: 10000,
       });
-      console.log('✅ Content loaded');
 
       // Small delay to ensure CSS is applied
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const pdfData = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm',
-        },
-      });
+      // const pdfData = await page.pdf({
+      //   format: 'A4',
+      //   printBackground: true,
+      //   margin: {
+      //     top: '20mm',
+      //     right: '15mm',
+      //     bottom: '20mm',
+      //     left: '15mm',
+      //   },
+      // });
+const pdfData = await page.pdf({
+  format: 'A4',
+  printBackground: true,
+  displayHeaderFooter: true,
+
+  headerTemplate: `<div></div>`, // empty header
+
+  footerTemplate: `
+    <div style="
+      font-size:10px;
+      width:100%;
+      text-align:center;
+      color:#6b7280;
+      padding:5px 0;
+    ">
+      Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+    </div>
+  `,
+
+  margin: {
+    top: '20mm',
+    right: '15mm',
+    bottom: '25mm',   // increased for footer
+    left: '15mm',
+  },
+});
+
 
       // Convert Uint8Array to Buffer
       const pdfBuffer = Buffer.from(pdfData);
