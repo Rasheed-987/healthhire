@@ -35,6 +35,8 @@ import {
   Mail,
   Award as CertificateIcon,
   Loader2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -203,6 +205,7 @@ export default function Profile() {
     fields: workFields,
     append: appendWork,
     remove: removeWork,
+    swap: swapWorkExperience,
   } = useFieldArray({
     control: form.control,
     name: "workExperience",
@@ -263,7 +266,7 @@ export default function Profile() {
       });
     }
   }, [user, form]);
-``
+  ``
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
       return await apiRequest("PATCH", "/api/auth/user", data);
@@ -302,7 +305,7 @@ export default function Profile() {
   // Watch form values to enable/disable save button
   const watchedFields = form.watch([
     "firstName",
-    "lastName", 
+    "lastName",
     "profession",
     "email",
     "phone",
@@ -318,7 +321,7 @@ export default function Profile() {
 
   const onError = (errors: any) => {
     console.log("Form validation errors:", errors);
-    
+
     // Scroll to first error field - prioritize Personal Information (required fields)
     if (errors.firstName || errors.lastName || errors.profession || errors.email || errors.phone || errors.city || errors.country) {
       document.getElementById("personal-info")?.scrollIntoView({ behavior: "smooth" });
@@ -362,12 +365,12 @@ export default function Profile() {
         </div>
 
         {/* Page Header */}
-                <div className="mb-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Candidate Profile
           </h1>
           <p className="text-muted-foreground text-lg">
-            Complete at least the Personal Information section to save your profile. 
+            Complete at least the Personal Information section to save your profile.
             Other sections are optional and can be added later.
           </p>
         </div>
@@ -662,13 +665,13 @@ export default function Profile() {
                             startDate: startDate || "",
                           };
                         })
-                        .sort((a, b) => {
-                          if (a.isCurrent && !b.isCurrent) return -1;
-                          if (!a.isCurrent && b.isCurrent) return 1;
-                          return (b.startDate || "").localeCompare(
-                            a.startDate || ""
-                          );
-                        });
+                        // .sort((a, b) => {
+                        //   if (a.isCurrent && !b.isCurrent) return -1;
+                        //   if (!a.isCurrent && b.isCurrent) return 1;
+                        //   return (b.startDate || "").localeCompare(
+                        //     a.startDate || ""
+                        //   );
+                        // });
 
                       return orderedWork.map(
                         ({ field, originalIndex, isCurrent }) => (
@@ -690,25 +693,50 @@ export default function Profile() {
                                   {isCurrent ? "Current" : "Previous"}
                                 </Badge> */}
                               </div>
-
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                disabled={deleteWorkExperience.isPending} // Disable while deleting
-                                onClick={() =>
-                                  deleteWorkExperience.mutate(originalIndex)
-                                }
-                              >
-                                {deleteWorkExperience.isPending ? (
-                                  <>
-                                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                    Deleting...
-                                  </>
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
+                              <div className="flex gap-2">
+                                {/* Swap Up */}
+                                {originalIndex > 0 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => swapWorkExperience(originalIndex, originalIndex - 1)}
+                                    aria-label="Move up"
+                                  >
+                                    <ArrowUp className="w-4 h-4" />
+                                  </Button>
                                 )}
-                              </Button>
+                                {/* Swap Down */}
+                                {originalIndex < workFields.length - 1 && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => swapWorkExperience(originalIndex, originalIndex + 1)}
+                                    aria-label="Move down"
+                                  >
+                                    <ArrowDown className="w-4 h-4" />
+                                  </Button>
+                                )}
+                                {/* Delete Button */}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={deleteWorkExperience.isPending}
+                                  onClick={() => deleteWorkExperience.mutate(originalIndex)}
+                                  aria-label="Delete experience"
+                                >
+                                  {deleteWorkExperience.isPending ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                      Deleting...
+                                    </>
+                                  ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -811,34 +839,26 @@ export default function Profile() {
                             <FormField
                               control={form.control}
                               name={`workExperience.${originalIndex}.current`}
-                              render={({ field }) => {
-                                // Check if any other work experience is marked as current
-                                const hasOtherCurrent = workFields.some((_, i) => 
-                                  i !== originalIndex && form.watch(`workExperience.${i}.current`)
-                                );
-                                
-                                return (
-                                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={field.value || false}
-                                        disabled={hasOtherCurrent && !field.value}
-                                        onCheckedChange={(checked) => {
-                                          field.onChange(checked);
-                                          if (checked) {
-                                            // Clear end date when marking as current
-                                            form.setValue(`workExperience.${originalIndex}.endDate`, "");
-                                          }
-                                        }}
-                                        data-testid={`checkbox-work-current-${originalIndex}`}
-                                      />
-                                    </FormControl>
-                                    <FormLabel className={`text-sm font-normal ${hasOtherCurrent && !field.value ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
-                                      Currently working here
-                                    </FormLabel>
-                                  </FormItem>
-                                );
-                              }}
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value || false}
+                                      onCheckedChange={(checked) => {
+                                        field.onChange(checked);
+                                        if (checked) {
+                                          // Clear end date when marking as current
+                                          form.setValue(`workExperience.${originalIndex}.endDate`, "");
+                                        }
+                                      }}
+                                      data-testid={`checkbox-work-current-${originalIndex}`}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-normal cursor-pointer">
+                                    Currently working here
+                                  </FormLabel>
+                                </FormItem>
+                              )}
                             />
 
                             {/* Duties Section */}
@@ -962,18 +982,14 @@ export default function Profile() {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        // Mark all existing experiences as not current
-                        workFields.forEach((_, i) => {
-                          form.setValue(`workExperience.${i}.current`, false);
-                        });
-                        // Add new experience as current
+                        // Add new experience (not marked as current by default)
                         appendWork({
                           jobTitle: "",
                           employer: "",
                           location: "",
                           startDate: "",
                           endDate: "",
-                          current: true,
+                          current: false,
                           duties: [""],
                         });
                       }}
@@ -1275,7 +1291,7 @@ export default function Profile() {
                 {!canSave && (
                   <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <p className="text-sm text-amber-800">
-                      <strong>Required:</strong> Please complete the Personal Information section 
+                      <strong>Required:</strong> Please complete the Personal Information section
                       (First Name, Last Name, Profession, Email, Phone, City, Country) to enable saving.
                     </p>
                   </div>
@@ -1320,10 +1336,10 @@ export default function Profile() {
                     {(() => {
                       const sections = [
                         form.watch("firstName") &&
-                          form.watch("lastName") &&
-                          form.watch("profession") &&
-                          form.watch("email") &&
-                          form.watch("phone"),
+                        form.watch("lastName") &&
+                        form.watch("profession") &&
+                        form.watch("email") &&
+                        form.watch("phone"),
                         skillsFields.length > 0,
                         workFields.length > 0,
                         educationFields.length > 0,
@@ -1399,10 +1415,10 @@ export default function Profile() {
                   <div className="flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       {form.watch("firstName") &&
-                      form.watch("lastName") &&
-                      form.watch("profession") &&
-                      form.watch("email") &&
-                      form.watch("phone") ? (
+                        form.watch("lastName") &&
+                        form.watch("profession") &&
+                        form.watch("email") &&
+                        form.watch("phone") ? (
                         <Check
                           className="h-4 w-4 text-green-600"
                           aria-label="Complete"
@@ -1429,19 +1445,19 @@ export default function Profile() {
                       data-testid="button-edit-personal-info"
                       aria-label={
                         form.watch("firstName") &&
-                        form.watch("lastName") &&
-                        form.watch("profession") &&
-                        form.watch("email") &&
-                        form.watch("phone")
+                          form.watch("lastName") &&
+                          form.watch("profession") &&
+                          form.watch("email") &&
+                          form.watch("phone")
                           ? "Edit Personal Information"
                           : "Add Personal Information"
                       }
                     >
                       {form.watch("firstName") &&
-                      form.watch("lastName") &&
-                      form.watch("profession") &&
-                      form.watch("email") &&
-                      form.watch("phone") ? (
+                        form.watch("lastName") &&
+                        form.watch("profession") &&
+                        form.watch("email") &&
+                        form.watch("phone") ? (
                         <>
                           <Edit className="h-3 w-3 mr-1" />
                           Edit

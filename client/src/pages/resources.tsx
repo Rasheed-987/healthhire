@@ -66,7 +66,7 @@ export default function Resources() {
     title: resource.title,
     description: resource.description,
     type: resource.icon,
-    duration: resource.icon === 'video' ? '30 min' : '10 min read',
+    // duration: resource.icon === 'video' ? '30 min' : '10 min read',
     icon: iconMap[resource.icon] || BookOpen,
     fileUrl: resource.fileUrl,
     videoUrl: resource.videoUrl,
@@ -219,14 +219,14 @@ export default function Resources() {
                               <Lock className="inline h-4 w-4 text-muted-foreground ml-2" />
                             )}
                           </CardTitle>
-                          <div className="flex items-center space-x-2 mt-1">
+                          {/* <div className="flex items-center space-x-2 mt-1">
                             <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                               {resource.type}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {resource.duration}
                             </span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

@@ -368,20 +368,46 @@ export default function QASession() {
 
         {/* Progress Header */}
         <div className="mb-6">
-          <div className="flex justify-between gap-3 md:gap-7 xl:gap-10 items-center mb-2">
-            <h1 className="text-2xl font-bold">
-              {sessionData.session.jobDescription}
-            </h1>
-            <div className="text-sm text-gray-600">
-              Question {currentQuestionIndex + 1} of {totalQuestions}
-              {reviewQueue.length > 0 && (
-                <span className="ml-2 text-orange-600">
-                  ({reviewQueue.length} to review)
-                </span>
-              )}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    {sessionData.session.jobTitle}
+                  </h1>
+                </div>
+                <div className="text-sm text-gray-600 line-clamp-2 max-w-2xl">
+                  {sessionData.session.jobDescription}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 text-sm">
+                <div className="bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+                  <div className="text-gray-500 text-xs mb-1">Progress</div>
+                  <div className="font-semibold text-gray-900">
+                    {currentQuestionIndex + 1} / {totalQuestions}
+                  </div>
+                </div>
+                {reviewQueue.length > 0 && (
+                  <div className="bg-orange-50 px-4 py-2 rounded-lg border border-orange-200">
+                    <div className="text-orange-600 text-xs mb-1">To Review</div>
+                    <div className="font-semibold text-orange-700">
+                      {reviewQueue.length}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Session Progress</span>
+                <span className="font-medium">{Math.round(progressPercent)}%</span>
+              </div>
+              <Progress value={progressPercent} className="w-full h-2" />
             </div>
           </div>
-          <Progress value={progressPercent} className="w-full" />
         </div>
 
         {/* Question Card */}

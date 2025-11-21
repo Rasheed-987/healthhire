@@ -263,7 +263,7 @@ export default function Dashboard() {
     {
       id: "profile",
       title: "Candidate Profile",
-      description: "Build your comprehensive healthcare professional profile with NHS-specific expertise",
+      description: "Build your comprehensive professional profile that powers your applications",
       icon: User,
       iconColor: "text-blue-600",
       iconBg: "bg-blue-100 dark:bg-blue-900",
@@ -279,7 +279,7 @@ export default function Dashboard() {
     {
       id: "jobs",
       title: "Job Finder",
-      description: "Intelligent NHS job matching with role fit scoring and eligibility filtering",
+      description: "Search for roles and find out which websites to use so you don't miss a role",
       icon: Search,
       iconColor: "text-emerald-600",
       iconBg: "bg-emerald-100 dark:bg-emerald-900",
@@ -295,7 +295,7 @@ export default function Dashboard() {
     {
       id: "documents",
       title: "Application Documents",
-      description: "Generate tailored Supporting Information for NHS applications and view your master CV",
+      description: "Generate tailored Supporting Information, Cover Letters for NHS applications and view your master CV",
       icon: FileText,
       iconColor: "text-amber-600",
       iconBg: "bg-amber-100 dark:bg-amber-900",
@@ -311,7 +311,7 @@ export default function Dashboard() {
     {
       id: "resources",
       title: "Resources Hub",
-      description: "NHS guides, checklists, mini-courses and CPD tracking for career development",
+      description: "NHS guides, walkthroughs and additional guidance for your career",
       icon: BookOpen,
       iconColor: "text-indigo-600",
       iconBg: "bg-indigo-100 dark:bg-indigo-900",
@@ -327,7 +327,7 @@ export default function Dashboard() {
     {
       id: "practice",
       title: "Interview Practice",
-      description: "Get realistic NHS interview questions and harsh but constructive feedback from Henry the Helper",
+      description: "Get realistic interview questions with harsh but constructive timed feedback from Henry the Helper",
       icon: Mic,
       iconColor: "text-rose-600",
       iconBg: "bg-rose-100 dark:bg-rose-900",
@@ -343,7 +343,7 @@ export default function Dashboard() {
     {
       id: "qa",
       title: "Q&A Generator",
-      description: "Role-specific interview questions with model answers and practice planning",
+      description: "Role-specific interview questions with model answers (flashcard revision style)",
       icon: MessageCircleQuestion,
       iconColor: "text-cyan-600",
       iconBg: "bg-cyan-100 dark:bg-cyan-900",
@@ -359,7 +359,7 @@ export default function Dashboard() {
     {
       id: "tracker",
       title: "Job Tracker & Analytics",
-      description: "Kanban board for applications with KPIs and motivational dashboard",
+      description: "Kanban board for applications with KPIs and clean dashboard",
       icon: BarChart3,
       iconColor: "text-violet-600",
       iconBg: "bg-violet-100 dark:bg-violet-900",
@@ -391,7 +391,7 @@ export default function Dashboard() {
     {
       id: "support",
       title: "Support",
-      description: "Get help from Henry the Helper, browser common issues, or submit a support ticket",
+      description: "Get help from Henry the Helper, browse common issues, or talk to the team",
       icon: HelpCircle,
       iconColor: "text-teal-600",
       iconBg: "bg-teal-100 dark:bg-teal-900",
@@ -407,15 +407,15 @@ export default function Dashboard() {
     {
       id: "referrals",
       title: "Referral Program",
-      description: "Earn rewards by referring healthcare professionals to HealthHire Portal",
+      description: "Earn exciting rewards by referring others to HealthHire Portal",
       icon: Users,
       iconColor: "text-purple-600",
       iconBg: "bg-purple-100 dark:bg-purple-900",
       value: null,
       label: null,
       valueColor: null,
-      actionText: "Coming Soon",
-      actionSubtext: "Refer friends and earn rewards",
+      actionText: "Refer friends and earn rewards",
+      actionSubtext: "",
       href: "/referrals",
       isPremium: true,
       feature: "referral_program"
