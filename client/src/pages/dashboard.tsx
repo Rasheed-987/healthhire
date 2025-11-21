@@ -15,12 +15,12 @@ import { MarketingConsentWidget } from "@/components/marketing-consent-widget";
 import { AnalyticsConsentWidget } from "@/components/analytics-consent-widget";
 import { HenryOnboarding } from "@/components/henry-onboarding";
 import { Button } from "@/components/ui/button";
-import { 
-  User, 
-  Search, 
-  FileText, 
-  BookOpen, 
-  Mic, 
+import {
+  User,
+  Search,
+  FileText,
+  BookOpen,
+  Mic,
   MessageCircleQuestion,
   BarChart3,
   Settings,
@@ -116,7 +116,7 @@ export default function Dashboard() {
         variant: "destructive",
       });
       setTimeout(() => {
-  window.location.href = "/login";
+        window.location.href = "/login";
       }, 500);
       return;
     }
@@ -137,7 +137,7 @@ export default function Dashboard() {
   });
 
   // Fetch onboarding status
-  const { data: onboardingStatus } = useQuery<{hasCompletedOnboarding: boolean, hasCompletedPremiumOnboarding: boolean, subscriptionStatus: string}>({
+  const { data: onboardingStatus } = useQuery<{ hasCompletedOnboarding: boolean, hasCompletedPremiumOnboarding: boolean, subscriptionStatus: string }>({
     queryKey: ["/api/onboarding/status"],
     retry: false,
     enabled: isAuthenticated,
@@ -197,23 +197,20 @@ export default function Dashboard() {
   // Check if user needs onboarding
   useEffect(() => {
     if (!onboardingStatus || !user) return;
-    
+
     // If user has already completed onboarding, never show it again
     if (onboardingStatus.hasCompletedOnboarding) {
       setShowOnboarding(false);
       return;
     }
-    
+
     // If user has already seen onboarding this session, don't show it again
     if (hasCompletedOnboardingThisSession) return;
-    
-    const needsOnboarding = (
-      // First time user (free) - only if they haven't completed onboarding
-      (!onboardingStatus.hasCompletedOnboarding) ||
-      // Premium user who hasn't done premium onboarding
-      (isPaid && !onboardingStatus.hasCompletedPremiumOnboarding)
-    );
-    
+
+    const needsOnboarding = isPaid
+      ? !onboardingStatus.hasCompletedPremiumOnboarding
+      : !onboardingStatus.hasCompletedOnboarding;
+
     if (needsOnboarding && !showOnboarding) {
       // Small delay to let dashboard load first
       setTimeout(() => {
@@ -256,7 +253,7 @@ export default function Dashboard() {
 
   if (isLoading || isDashboardLoading) {
     return <FullscreenLoader show={isLoading || isDashboardLoading} />;
-    
+
   }
 
   const sectionCards = [
@@ -424,7 +421,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background" data-testid="dashboard-page">
-      <Header 
+      <Header
         user={user ? {
           firstName: user.firstName || undefined,
           lastName: user.lastName || undefined,
@@ -432,10 +429,10 @@ export default function Dashboard() {
           email: user.email || undefined,
           isAdmin: user.isAdmin || undefined,
           adminRole: user.adminRole || undefined
-        } : undefined} 
-        profileCompletion={dashboardData?.profileCompletion || 0} 
+        } : undefined}
+        profileCompletion={dashboardData?.profileCompletion || 0}
       />
-      
+
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Enhanced Welcome Section */}
         <div className="relative mb-16">
@@ -446,11 +443,11 @@ export default function Dashboard() {
             <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-gradient-to-bl from-secondary/10 to-accent/5 rounded-full blur-lg animate-pulse delay-500"></div>
             <div className="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-to-tl from-primary/5 to-secondary/15 rounded-full blur-xl animate-pulse delay-1500"></div>
           </div>
-          
+
           <div className="relative bg-gradient-to-br from-card via-card/98 to-card/95 backdrop-blur-md border border-border/40 rounded-3xl p-10 shadow-2xl hover:shadow-3xl transition-all duration-700 hover:scale-[1.02] group">
             {/* Animated border glow effect */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-primary/20 via-transparent to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10 blur-xl"></div>
-            
+
             <div className="flex items-start gap-6">
               <div className="flex-shrink-0">
                 <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center shadow-lg">
@@ -466,7 +463,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            
+
             {/* Enhanced accent elements */}
             <div className="absolute bottom-0 left-10 right-10 h-1 bg-gradient-to-r from-transparent via-primary/30 through-accent/20 to-transparent rounded-full"></div>
             <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-2 bg-gradient-to-r from-transparent via-primary/20 to-transparent rounded-full blur-sm"></div>
@@ -475,7 +472,7 @@ export default function Dashboard() {
 
         {/* Free Tier Status Banner */}
         {!isPaid && (
-          <UpgradePrompt 
+          <UpgradePrompt
             title="Limited Access - Upgrade to Unlock All Features"
             description="Get unlimited job searching, AI document generation, interview practice, and more for £70 one-time"
             variant="banner"

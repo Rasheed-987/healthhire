@@ -18,7 +18,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "profile",
     title: "Your Candidate Profile",
     freeDescription: "This is where you'll build your comprehensive healthcare professional profile. Add your qualifications, experience, and key skills. A complete profile is essential for job matching and helps you stand out to NHS employers.",
-    premiumDescription: "Your profile is the foundation of your NHS career success! As a premium user, you can create detailed profiles that showcase your full healthcare expertise. The system uses this information for intelligent job matching, CV generation, and interview preparation. Complete profiles get 3x more job matches!",
+    premiumDescription: "Your profile is the foundation of your NHS career success! As a premium user, you can create a detailed profile that showcases your full healthcare expertise. The system uses this information for CV generation, supporting information and interview preparation.",
     cardSelector: '[data-testid="sortable-card-profile"]',
     position: "bottom"
   },
@@ -26,7 +26,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "jobs",
     title: "Intelligent Job Finder",
     freeDescription: "Discover NHS jobs from multiple sources with basic filtering. See job titles and locations to get started with your search. This gives you a preview of the powerful job matching capabilities available with premium access.",
-    premiumDescription: "Welcome to the most advanced NHS job matching system! I analyze your profile against thousands of NHS positions daily, providing compatibility scores, salary insights, and eligibility filtering. You'll get unlimited searches, advanced filters, and personalized job recommendations that match your exact skills and career goals.",
+    premiumDescription: "Welcome to the Job Finder, search for jobs here and see what other jobs boards you should use as part of your job strategy.",
     cardSelector: '[data-testid="sortable-card-jobs"]',
     position: "bottom"
   },
@@ -34,7 +34,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "documents",
     title: "AI Document Generation",
     freeDescription: "Preview our AI-powered document generation system that creates tailored Supporting Information for NHS applications. See sample outputs and understand how AI can transform your job application process.",
-    premiumDescription: "This is where the magic happens! I'll generate perfectly tailored Supporting Information documents for every NHS application. Each document is customized to the specific job description, incorporating your experience and demonstrating how you meet every requirement. No more spending hours writing applications!",
+    premiumDescription: "This is where the magic happens! I'll generate tailored Supporting Information documents for every NHS application. Each document is customized to the specific job description, incorporating your experience and demonstrating how you meet every requirement. No more spending hours writing applications!",
     cardSelector: '[data-testid="sortable-card-documents"]',
     position: "bottom"
   },
@@ -42,7 +42,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "resources",
     title: "NHS Career Resources",
     freeDescription: "Access our library of NHS career guides and resources. Get insights into NHS application processes, interview techniques, and career progression paths to help you succeed in healthcare.",
-    premiumDescription: "Your comprehensive NHS career toolkit! Access exclusive guides, interview success frameworks, CPD tracking tools, and mini-courses. I've curated the most effective resources to accelerate your NHS career at every stage.",
+    premiumDescription: "Your comprehensive NHS career toolkit! Access exclusive videos, interview success frameworks and general advice. I've curated the most effective resources to accelerate your NHS career at every stage.",
     cardSelector: '[data-testid="sortable-card-resources"]',
     position: "bottom"
   },
@@ -58,7 +58,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "qa",
     title: "Interview Q&A Generator",
     freeDescription: "Discover how our AI generates role-specific interview questions with model answers. This tool helps you prepare for common NHS interview scenarios and understand what employers are looking for.",
-    premiumDescription: "Never be caught off-guard in interviews again! I generate unlimited, role-specific interview questions with detailed model answers. Each question is crafted based on NHS competency frameworks and your target positions, ensuring comprehensive preparation.",
+    premiumDescription: "Never be caught off-guard in interviews again! I generate role-specific interview questions with detailed model answers. Each question is crafted based on NHS competency frameworks and your target positions, ensuring comprehensive preparation.",
     cardSelector: '[data-testid="sortable-card-qa"]',
     position: "bottom"
   },
@@ -66,7 +66,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "tracker",
     title: "Application Tracker & Analytics",
     freeDescription: "Preview our application tracking system that helps you organize your job search. See how analytics can provide insights into your application success rates and areas for improvement.",
-    premiumDescription: "Transform your job search with data-driven insights! Track every application through our Kanban board, monitor success rates, identify patterns, and optimize your approach. The analytics dashboard shows exactly what's working and what needs adjustment.",
+    premiumDescription: "Transform your job search with the ultimate organisation! Track every application through our Kanban board, monitor success rates and optimise your approach. The analytics dashboard shows the whole picture in one easy to use dashboard so you don't get lost.",
     cardSelector: '[data-testid="sortable-card-tracker"]',
     position: "bottom"
   },
@@ -74,7 +74,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "news",
     title: "NHS News & Updates",
     freeDescription: "Stay informed about the latest NHS developments, policy changes, and healthcare industry news. Knowledge is power in your career journey, and staying updated gives you an edge in interviews and applications.",
-    premiumDescription: "Stay ahead with curated NHS insights! I monitor policy changes, new opportunities, and industry trends that directly impact your career. This intelligence helps you make informed decisions and impress in interviews with current knowledge.",
+    premiumDescription: "Stay ahead with the latest news! I monitor policy changes, new opportunities, and industry trends that directly impact your career. This intelligence helps you make informed decisions and impress in interviews with current knowledge.",
     cardSelector: '[data-testid="sortable-card-news"]',
     position: "bottom"
   },
@@ -82,7 +82,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: "referrals",
     title: "Referral Rewards Program",
     freeDescription: "Coming soon! Our referral program will reward you for helping fellow healthcare professionals discover HealthHire Portal. Earn benefits while building your professional network.",
-    premiumDescription: "Coming soon! As a premium member, you'll earn enhanced rewards for referring healthcare professionals. Build your network while earning exclusive benefits and helping others advance their NHS careers.",
+    premiumDescription: "As a premium member, you'll earn enhanced rewards for referring friends, colleagues or family. Build your network while earning exclusive benefits and helping others advance their careers.",
     cardSelector: '[data-testid="sortable-card-referrals"]',
     position: "bottom"
   }

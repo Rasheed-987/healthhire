@@ -110,7 +110,7 @@ function formatDateToMonthYear(dateStr: string): string {
   } catch (error) {
     console.warn(`Failed to parse date string "${dateStr}":`, error);
   }
-  
+
   return dateStr; // Return as-is if can't parse
 }
 
@@ -329,64 +329,57 @@ function generateCVHTML(cvData: any): string {
       </div>
       
       <div class="header">
-        <div class="name">${
-          cvData.personalInfo.name || "Healthcare Professional"
-        }</div>
+        <div class="name">${cvData.personalInfo.name || "Healthcare Professional"
+    }</div>
         <div class="contact">
-          ${
-            cvData.personalInfo.location
-              ? `<div class="contact-line">${cvData.personalInfo.location}</div>`
-              : ""
-          }
-          ${
-            cvData.personalInfo.phone
-              ? `<div class="contact-line">${cvData.personalInfo.phone}</div>`
-              : ""
-          }
-          ${
-            cvData.personalInfo.email
-              ? `<div class="contact-line">${cvData.personalInfo.email}</div>`
-              : ""
-          }
+          ${cvData.personalInfo.location
+      ? `<div class="contact-line">${cvData.personalInfo.location}</div>`
+      : ""
+    }
+          ${cvData.personalInfo.phone
+      ? `<div class="contact-line">${cvData.personalInfo.phone}</div>`
+      : ""
+    }
+          ${cvData.personalInfo.email
+      ? `<div class="contact-line">${cvData.personalInfo.email}</div>`
+      : ""
+    }
         </div>
       </div>
 
-      ${
-        cvData.registrations.length > 0
-          ? `
+      ${cvData.registrations.length > 0
+      ? `
         <div class="section">
           <div class="section-title">Professional Registration</div>
           ${cvData.registrations
-            .map(
-              (reg: any) => `
+        .map(
+          (reg: any) => `
             <div class="registration-item">
               <div class="reg-type">${reg.type}</div>
-              <div class="reg-details">Registration Number: ${reg.number}${
-                reg.expiry ? ` • Expires: ${reg.expiry}` : ""
-              }</div>
+              <div class="reg-details">Registration Number: ${reg.number}${reg.expiry ? ` • Expires: ${reg.expiry}` : ""
+            }</div>
             </div>
           `
-            )
-            .join("")}
+        )
+        .join("")}
         </div>
       `
-          : ""
-      }
+      : ""
+    }
 
-      ${
-        cvData.experience.length > 0
-          ? `
+      ${cvData.experience.length > 0
+      ? `
         <div class="section">
           <div class="section-title">Work Experience</div>
           ${[...cvData.experience]
-            .sort((a: any, b: any) => {
-              // Sort: current jobs first, then by start date (newest first)
-              if (a.current && !b.current) return -1;
-              if (!a.current && b.current) return 1;
-              return (b.startDate || "").localeCompare(a.startDate || "");
-            })
-            .map(
-              (exp: any) => `
+        .sort((a: any, b: any) => {
+          // Sort: current jobs first, then by start date (newest first)
+          if (a.current && !b.current) return -1;
+          if (!a.current && b.current) return 1;
+          return (b.startDate || "").localeCompare(a.startDate || "");
+        })
+        .map(
+          (exp: any) => `
             <div class="experience-item">
               <div class="job-header">
                 <div class="job-title">${exp.jobTitle}</div>
@@ -394,79 +387,71 @@ function generateCVHTML(cvData: any): string {
               </div>
               <div class="company">${exp.employer || exp.company || ""}</div>
               <div class="location-date">
-                ${
-                  exp.location ? `${exp.location} • ` : ""
-                }${formatDateToMonthYear(exp.startDate)} - ${
-                exp.current ? "Present" : formatDateToMonthYear(exp.endDate)
-              }
+                ${exp.location ? `${exp.location} • ` : ""
+            }${formatDateToMonthYear(exp.startDate)} - ${exp.current ? "Present" : formatDateToMonthYear(exp.endDate)
+            }
               </div>
-              ${
-                exp.duties && exp.duties.length > 0
-                  ? `
+              ${exp.duties && exp.duties.length > 0
+              ? `
                 <ul class="duties-list">
                   ${exp.duties
-                    .map((duty: string) => `<li>${duty}</li>`)
-                    .join("")}
+                .map((duty: string) => `<li>${duty}</li>`)
+                .join("")}
                 </ul>
               `
-                  : exp.description
-                  ? `
+              : exp.description
+                ? `
                 <ul class="duties-list">
                   ${exp.description
-                    .split("\n")
-                    .filter((line: string) => line.trim())
-                    .map((duty: string) => `<li>${duty.trim()}</li>`)
-                    .join("")}
+                  .split("\n")
+                  .filter((line: string) => line.trim())
+                  .map((duty: string) => `<li>${duty.trim()}</li>`)
+                  .join("")}
                 </ul>
               `
-                  : ""
-              }
+                : ""
+            }
             </div>
           `
-            )
-            .join("")}
+        )
+        .join("")}
         </div>
       `
-          : ""
-      }
+      : ""
+    }
 
-      ${
-        cvData.education.length > 0
-          ? `
+      ${cvData.education.length > 0
+      ? `
         <div class="section">
           <div class="section-title">Education & Qualifications</div>
           ${cvData.education
-            .map(
-              (edu: any) => `
+        .map(
+          (edu: any) => `
             <div class="education-item">
-              <div class="job-title">${
-                edu.qualification || edu.degree || "Qualification"
-              }</div>
+              <div class="job-title">${edu.qualification || edu.degree || "Qualification"
+            }</div>
               <div class="company">${edu.institution || ""}</div>
               <div class="location-date">
-                ${
-                  edu.location ? `${edu.location} • ` : ""
-                }${formatDateToMonthYear(edu.year || edu.endDate || "")}${
-                edu.grade ? ` • ${edu.grade}` : ""
-              }
+                ${edu.location ? `${edu.location} • ` : ""
+            }${formatDateToMonthYear(edu.year || edu.endDate || "")}${edu.grade ? ` • ${edu.grade}` : ""
+            }
               </div>
             </div>
           `
-            )
-            .join("")}
+        )
+        .join("")}
         </div>
       `
-          : ""
-      }
+      : ""
+    }
 
-      ${
-        cvData.courses && cvData.courses.length > 0
-          ? `
+      ${cvData.courses && cvData.courses.length > 0
+      ? `
         <div class="section">
           <div class="section-title">Courses & Certifications</div>
           ${cvData.courses
-            .map(
-              (course: any) => `
+        .map(
+          (course: any) => `
             <div class="education-item">
               <div class="job-title">${course.name || ""}</div>
               <div class="company">${course.provider || ""}</div>
@@ -475,29 +460,28 @@ function generateCVHTML(cvData: any): string {
               </div>
             </div>
           `
-            )
-            .join("")}
+        )
+        .join("")}
         </div>
       `
-          : ""
-      }
+      : ""
+    }
 
-      ${
-        cvData.skills.length > 0
-          ? `
+      ${cvData.skills.length > 0
+      ? `
         <div class="section">
           <div class="section-title">Skills</div>
           <div class="skills-list">
             ${cvData.skills
-              .map(
-                (skill: string) => `<span class="skill-item">${skill}</span>`
-              )
-              .join("")}
+        .map(
+          (skill: string) => `<span class="skill-item">${skill}</span>`
+        )
+        .join("")}
           </div>
         </div>
       `
-          : ""
-      }
+      : ""
+    }
 
       <!-- References section -->
       <div class="section">
@@ -807,7 +791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           (consent.consentDate &&
             acc[consent.consentType].consentDate &&
             new Date(consent.consentDate) >
-              new Date(acc[consent.consentType].consentDate))
+            new Date(acc[consent.consentType].consentDate))
         ) {
           acc[consent.consentType] = consent;
         }
@@ -1087,10 +1071,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fetch existing profile
         const existingProfile = await storage.getProfile(userId);
 
-   // ✅ Correct — replaces instead of merging
-const mergedWorkExperience = req.body.workExperience || [];
+        // ✅ Correct — replaces instead of merging
+        const mergedWorkExperience = req.body.workExperience || [];
 
-console.log("Received work experience data:", mergedWorkExperience); // Debug backend data
+        console.log("Received work experience data:", mergedWorkExperience); // Debug backend data
 
         // Update profile data
         const profileData = {
@@ -1199,15 +1183,15 @@ console.log("Received work experience data:", mergedWorkExperience); // Debug ba
           (app) =>
             app.interviewDate &&
             new Date(app.interviewDate) >
-              new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         ).length,
         successRate:
           applications.length > 0
             ? Math.round(
-                (applications.filter((app) => app.status === "offered").length /
-                  applications.length) *
-                  100
-              )
+              (applications.filter((app) => app.status === "offered").length /
+                applications.length) *
+              100
+            )
             : 0,
         recentApplications: applications.slice(0, 3),
         latestDocument: latestCV,
@@ -1316,10 +1300,10 @@ console.log("Received work experience data:", mergedWorkExperience); // Debug ba
           fileType === "profile_photo"
             ? "profile-photos"
             : fileType === "cv"
-            ? "cvs"
-            : fileType === "cover_letter"
-            ? "cover-letters"
-            : "certificates";
+              ? "cvs"
+              : fileType === "cover_letter"
+                ? "cover-letters"
+                : "certificates";
 
         // Upload to GCS and get public URL
         const fileUrl = await uploadFileToGCS(file, folder, userId);
@@ -1443,8 +1427,8 @@ console.log("Received work experience data:", mergedWorkExperience); // Debug ba
             job?.salaryMin && job?.salaryMax
               ? `£${job.salaryMin.toLocaleString()} - £${job.salaryMax.toLocaleString()}`
               : job?.salaryMin
-              ? `From £${job.salaryMin.toLocaleString()}`
-              : "Competitive/Negotiable",
+                ? `From £${job.salaryMin.toLocaleString()}`
+                : "Competitive/Negotiable",
           status: "applied", // Mark as applied since user clicked apply
           appliedAt: new Date(),
         };
@@ -1455,9 +1439,8 @@ console.log("Received work experience data:", mergedWorkExperience); // Debug ba
         await storage.logUserActivity({
           userId,
           activityType: "application_sent",
-          description: `Applied for ${job?.title || "job"} at ${
-            job?.employer || "employer"
-          }`,
+          description: `Applied for ${job?.title || "job"} at ${job?.employer || "employer"
+            }`,
           metadata: { jobId, employer: job?.employer },
           ipAddress: req.ip,
         });
@@ -2069,7 +2052,7 @@ console.log("Received work experience data:", mergedWorkExperience); // Debug ba
             question_num: i + 1,
             feedback:
               criticalFeedback[
-                Math.floor(Math.random() * criticalFeedback.length)
+              Math.floor(Math.random() * criticalFeedback.length)
               ],
           })),
           overall_feedback: `Your interview session is complete. Henry the Helper (Demo Mode) has scored your performance at ${score}/10. While you demonstrated some understanding of NHS values, there are significant areas for improvement. Your answers often lacked the specific, evidence-based examples that NHS interviewers expect. Healthcare interviews require concrete stories using the STAR method, measurable outcomes, and clear connections to patient care. You need to practice articulating your actual impact rather than describing general approaches.`,
@@ -2191,13 +2174,13 @@ Please review these 10 interview answers and provide:
 
 Questions and Answers:
 ${answers
-  .map(
-    (a: any, i: number) => `
+            .map(
+              (a: any, i: number) => `
 ${i + 1}. ${a.question}
 Answer: ${a.answer}
 `
-  )
-  .join("")}
+            )
+            .join("")}
 
 Please respond in JSON format:
 {
@@ -3027,6 +3010,8 @@ Please respond in JSON format:
         const updateData: any = {};
         if (type === "premium" && isPremium) {
           updateData.hasCompletedPremiumOnboarding = true;
+          // Also mark basic onboarding as complete since premium includes everything
+          updateData.hasCompletedOnboarding = true;
         } else {
           updateData.hasCompletedOnboarding = true;
         }
@@ -3344,9 +3329,8 @@ Please respond in JSON format:
           .where(
             and(
               eq(aiUsageTracking.userId, userId),
-              sql`${aiUsageTracking.usageDate} >= ${
-                thirtyDaysAgo.toISOString().split("T")[0]
-              }`
+              sql`${aiUsageTracking.usageDate} >= ${thirtyDaysAgo.toISOString().split("T")[0]
+                }`
             )
           )
           .orderBy(aiUsageTracking.usageDate);
@@ -3790,7 +3774,7 @@ Please respond in JSON format:
           message: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
         });
-        res.status(500).json({ 
+        res.status(500).json({
           message: "Failed to delete user",
           error: error instanceof Error ? error.message : String(error)
         });
@@ -3821,8 +3805,7 @@ Please respond in JSON format:
           "suspend_user",
           "user",
           userId,
-          `Suspended user ${suspendedUser.email}. Reason: ${
-            reason || "No reason provided"
+          `Suspended user ${suspendedUser.email}. Reason: ${reason || "No reason provided"
           }`
         );
 
@@ -4265,9 +4248,9 @@ Please respond in JSON format:
   });
 
   // ==================== LEARNING RESOURCES MANAGEMENT ====================
-  
+
   // Get all learning resources
-  app.get("/api/admin/resources",  async (req: any, res) => {
+  app.get("/api/admin/resources", async (req: any, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Authentication required" });
     }
@@ -4301,20 +4284,20 @@ Please respond in JSON format:
 
       // Validation
       if (!title || !description || !icon || !type) {
-        return res.status(400).json({ 
-          message: "Title, description, icon, and type are required" 
+        return res.status(400).json({
+          message: "Title, description, icon, and type are required"
         });
       }
 
       if (type === "file" && !fileUrl) {
-        return res.status(400).json({ 
-          message: "File URL is required for file type resources" 
+        return res.status(400).json({
+          message: "File URL is required for file type resources"
         });
       }
 
       if (type === "video" && !videoUrl) {
-        return res.status(400).json({ 
-          message: "Video URL is required for video type resources" 
+        return res.status(400).json({
+          message: "Video URL is required for video type resources"
         });
       }
 
@@ -4441,7 +4424,7 @@ Please respond in JSON format:
         console.log("req.file:", req.file);
         console.log("req.body:", req.body);
         console.log("req.user exists:", !!req.user);
-        
+
         const userId = req.user.claims.sub;
         const user = await storage.getUser(userId);
 
@@ -4475,14 +4458,14 @@ Please respond in JSON format:
         const fileUrl = await uploadFileToGCS(file, "resources", userId);
 
         // Return the file URL for frontend use
-        res.json({ 
+        res.json({
           url: fileUrl,
           filePath: fileUrl,
           fileName: file.originalname,
           fileSize: file.size,
-          message: "Resource file uploaded successfully" 
+          message: "Resource file uploaded successfully"
         });
-        
+
       } catch (error) {
         console.error("Error uploading resource file:", error);
         res.status(500).json({ message: "Failed to upload resource file" });
@@ -4535,8 +4518,8 @@ Please respond in JSON format:
 
       // Validation
       if (!title || !content) {
-        return res.status(400).json({ 
-          message: "Title and content are required" 
+        return res.status(400).json({
+          message: "Title and content are required"
         });
       }
 
@@ -4601,7 +4584,7 @@ Please respond in JSON format:
       const { title, description, content, category, type, priority, readTime, publishDate } = req.body;
 
       console.log("Updating news article with data:", {
-        title, description, content, category, type, priority, 
+        title, description, content, category, type, priority,
         readTime, publishDate,
         readTimeType: typeof readTime,
         readTimeLength: readTime?.length
@@ -4753,8 +4736,8 @@ Please respond in JSON format:
 
       // Validation
       if (!title || !content || !category) {
-        return res.status(400).json({ 
-          message: "Title, content, and category are required" 
+        return res.status(400).json({
+          message: "Title, content, and category are required"
         });
       }
 
@@ -5115,12 +5098,12 @@ Please respond in JSON format:
           courses: profile.courses || [],
           registrations: profile.registrationNumber
             ? [
-                {
-                  type: profile.profession || "Professional Registration",
-                  number: profile.registrationNumber,
-                  expiry: undefined, // Will be added when we add expiry field to profile
-                },
-              ]
+              {
+                type: profile.profession || "Professional Registration",
+                number: profile.registrationNumber,
+                expiry: undefined, // Will be added when we add expiry field to profile
+              },
+            ]
             : [],
           lastUpdated: profile.updatedAt || new Date().toISOString(),
         };
@@ -5168,12 +5151,12 @@ Please respond in JSON format:
           courses: profile.courses || [],
           registrations: profile.registrationNumber
             ? [
-                {
-                  type: profile.profession || "Professional Registration",
-                  number: profile.registrationNumber,
-                  expiry: undefined, // Will be added when we add expiry field to profile
-                },
-              ]
+              {
+                type: profile.profession || "Professional Registration",
+                number: profile.registrationNumber,
+                expiry: undefined, // Will be added when we add expiry field to profile
+              },
+            ]
             : [],
         };
 
@@ -5449,10 +5432,9 @@ Registration Number: ${profile?.registrationNumber || "Not specified"}
 Current Location: ${profile?.city || ""} ${profile?.country || ""}
 
 WORK EXPERIENCE:
-${
-  experienceDetails ||
-  "• Healthcare professional with relevant NHS/clinical experience"
-}
+${experienceDetails ||
+            "• Healthcare professional with relevant NHS/clinical experience"
+            }
 
 EDUCATION & QUALIFICATIONS:
 ${educationDetails || "• Healthcare qualification from accredited institution"}
@@ -5517,12 +5499,11 @@ ${cvInfo}
 Job Description:
 ${jobDescription.trim()}
 
-${
-  personSpecification
-    ? `Person Specification:
+${personSpecification
+              ? `Person Specification:
 ${personSpecification.trim()}`
-    : ""
-}
+              : ""
+            }
 
 CRITICAL: Copy the EXACT names, job titles, organizations, qualifications, and institutions from the candidate profile above. Do not paraphrase or generalize - use their precise details. When referencing experience, FOLLOW THE PROVIDED ORDER: start with the role tagged [CURRENT ROLE], then proceed to older roles.`;
 
@@ -5686,10 +5667,9 @@ Registration Number: ${profile?.registrationNumber || "Not specified"}
 Current Location: ${profile?.city || ""} ${profile?.country || ""}
 
 WORK EXPERIENCE:
-${
-  experienceDetails ||
-  "Healthcare professional with relevant NHS/clinical experience"
-}
+${experienceDetails ||
+            "Healthcare professional with relevant NHS/clinical experience"
+            }
 
 EDUCATION & QUALIFICATIONS:
 ${educationDetails || "Healthcare qualification from accredited institution"}
@@ -6947,108 +6927,108 @@ Return exactly 3 questions, one per line, no numbering or extra text:`;
     }
   });
 
-app.get(
-  "/api/qa/session/:sessionId/download-pdf",
-  ensureAuthenticated,
-  async (req: any, res) => {
-    let browser;
-    try {
-      const userId = req.user.claims.sub;
-      const sessionId = req.params.sessionId;
+  app.get(
+    "/api/qa/session/:sessionId/download-pdf",
+    ensureAuthenticated,
+    async (req: any, res) => {
+      let browser;
+      try {
+        const userId = req.user.claims.sub;
+        const sessionId = req.params.sessionId;
 
-      // Verify session belongs to user and is completed
-      const [session] = await db
-        .select()
-        .from(qaSessions)
-        .where(
-          and(eq(qaSessions.id, sessionId), eq(qaSessions.userId, userId))
-        );
+        // Verify session belongs to user and is completed
+        const [session] = await db
+          .select()
+          .from(qaSessions)
+          .where(
+            and(eq(qaSessions.id, sessionId), eq(qaSessions.userId, userId))
+          );
 
-      if (!session) {
-        return res.status(404).json({ message: "Session not found" });
-      }
+        if (!session) {
+          return res.status(404).json({ message: "Session not found" });
+        }
 
-      if (!session.completedAt) {
-        return res.status(400).json({
-          message: "Session must be completed before downloading PDF"
+        if (!session.completedAt) {
+          return res.status(400).json({
+            message: "Session must be completed before downloading PDF"
+          });
+        }
+
+        // Get all questions for this session
+        const questions = await db
+          .select()
+          .from(qaQuestions)
+          .where(eq(qaQuestions.sessionId, sessionId))
+          .orderBy(qaQuestions.questionOrder);
+
+        if (!questions || questions.length === 0) {
+          return res.status(404).json({ message: "No questions found for this session" });
+        }
+
+        console.log(`✅ Found ${questions.length} questions for session`);
+
+        // Generate HTML content
+        const htmlContent = generateQASessionHTML({
+          session,
+          questions
         });
-      }
 
-      // Get all questions for this session
-      const questions = await db
-        .select()
-        .from(qaQuestions)
-        .where(eq(qaQuestions.sessionId, sessionId))
-        .orderBy(qaQuestions.questionOrder);
 
-      if (!questions || questions.length === 0) {
-        return res.status(404).json({ message: "No questions found for this session" });
-      }
+        // --------- UNIVERSAL PUPPETEER SECTION (Local & Production) ---------
+        const isProd = process.env.NODE_ENV === "production";
 
-      console.log(`✅ Found ${questions.length} questions for session`);
+        const chromiumModule = await import("@sparticuz/chromium");
+        const puppeteerModule = isProd
+          ? await import("puppeteer-core")
+          : await import("puppeteer");
 
-      // Generate HTML content
-      const htmlContent = generateQASessionHTML({
-        session,
-        questions
-      });
+        const chromium = chromiumModule.default ?? chromiumModule;
+        const puppeteerLib = puppeteerModule.default ?? puppeteerModule;
 
- 
-      // --------- UNIVERSAL PUPPETEER SECTION (Local & Production) ---------
- const isProd = process.env.NODE_ENV === "production";
+        browser = await puppeteerLib.launch({
+          headless: true,
+          executablePath: isProd ? await chromium.executablePath() : undefined,
+          args: isProd
+            ? [
+              ...chromium.args,
+              "--no-sandbox",
+              "--disable-setuid-sandbox",
+              "--disable-dev-shm-usage",
+              "--disable-gpu",
+              "--disable-web-security",
+            ]
+            : ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+        });
 
-const chromiumModule = await import("@sparticuz/chromium");
-const puppeteerModule = isProd
-  ? await import("puppeteer-core")
-  : await import("puppeteer");
+        const page = await browser.newPage();
 
-const chromium = chromiumModule.default ?? chromiumModule;
-const puppeteerLib = puppeteerModule.default ?? puppeteerModule;
+        // Use domcontentloaded instead of networkidle0 for faster, more reliable loading
+        await page.setContent(htmlContent, {
+          waitUntil: 'domcontentloaded',
+          timeout: 10000,
+        });
 
-browser = await puppeteerLib.launch({
-  headless: true,
-  executablePath: isProd ? await chromium.executablePath() : undefined,
-  args: isProd
-    ? [
-        ...chromium.args,
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--disable-web-security",
-      ]
-    : ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-});
+        // Small delay to ensure CSS is applied
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      const page = await browser.newPage();
+        // const pdfData = await page.pdf({
+        //   format: 'A4',
+        //   printBackground: true,
+        //   margin: {
+        //     top: '20mm',
+        //     right: '15mm',
+        //     bottom: '20mm',
+        //     left: '15mm',
+        //   },
+        // });
+        const pdfData = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          displayHeaderFooter: true,
 
-      // Use domcontentloaded instead of networkidle0 for faster, more reliable loading
-      await page.setContent(htmlContent, {
-        waitUntil: 'domcontentloaded',
-        timeout: 10000,
-      });
+          headerTemplate: `<div></div>`, // empty header
 
-      // Small delay to ensure CSS is applied
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // const pdfData = await page.pdf({
-      //   format: 'A4',
-      //   printBackground: true,
-      //   margin: {
-      //     top: '20mm',
-      //     right: '15mm',
-      //     bottom: '20mm',
-      //     left: '15mm',
-      //   },
-      // });
-const pdfData = await page.pdf({
-  format: 'A4',
-  printBackground: true,
-  displayHeaderFooter: true,
-
-  headerTemplate: `<div></div>`, // empty header
-
-  footerTemplate: `
+          footerTemplate: `
     <div style="
       font-size:10px;
       width:100%;
@@ -7060,57 +7040,57 @@ const pdfData = await page.pdf({
     </div>
   `,
 
-  margin: {
-    top: '20mm',
-    right: '15mm',
-    bottom: '25mm',   // increased for footer
-    left: '15mm',
-  },
-});
+          margin: {
+            top: '20mm',
+            right: '15mm',
+            bottom: '25mm',   // increased for footer
+            left: '15mm',
+          },
+        });
 
 
-      // Convert Uint8Array to Buffer
-      const pdfBuffer = Buffer.from(pdfData);
-      console.log('✅ PDF generated, size:', pdfBuffer.length, 'bytes');
+        // Convert Uint8Array to Buffer
+        const pdfBuffer = Buffer.from(pdfData);
+        console.log('✅ PDF generated, size:', pdfBuffer.length, 'bytes');
 
-      await browser.close();
-      browser = null;
+        await browser.close();
+        browser = null;
 
-      // ---------- SEND PDF RESPONSE ----------
-      const safeJobTitle = session.sessionName
-        ? session.sessionName.replace(/[^a-z0-9]/gi, "_").substring(0, 50)
-        : "QandA_Session";
+        // ---------- SEND PDF RESPONSE ----------
+        const safeJobTitle = session.sessionName
+          ? session.sessionName.replace(/[^a-z0-9]/gi, "_").substring(0, 50)
+          : "QandA_Session";
 
-      const filename = `QA-${safeJobTitle}.pdf`;
+        const filename = `QA-${safeJobTitle}.pdf`;
 
-      // Use writeHead and end for proper binary handling
-      res.writeHead(200, {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Content-Length": pdfBuffer.length,
-        "Cache-Control": "no-cache"
-      });
+        // Use writeHead and end for proper binary handling
+        res.writeHead(200, {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+          "Content-Length": pdfBuffer.length,
+          "Cache-Control": "no-cache"
+        });
 
-      return res.end(pdfBuffer, 'binary');
-    } catch (error) {
-      console.error("Error downloading Q&A session PDF:", error);
+        return res.end(pdfBuffer, 'binary');
+      } catch (error) {
+        console.error("Error downloading Q&A session PDF:", error);
 
-      // Ensure browser is closed on error
-      if (browser) {
-        try {
-          await browser.close();
-        } catch (closeError) {
-          console.error("Error closing browser:", closeError);
+        // Ensure browser is closed on error
+        if (browser) {
+          try {
+            await browser.close();
+          } catch (closeError) {
+            console.error("Error closing browser:", closeError);
+          }
         }
-      }
 
-      res.status(500).json({
-        message: "Failed to download Q&A session PDF",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
+        res.status(500).json({
+          message: "Failed to download Q&A session PDF",
+          error: error instanceof Error ? error.message : "Unknown error"
+        });
+      }
     }
-  }
-);
+  );
 
   // Get session with questions and progress
   app.get(

@@ -64,6 +64,7 @@ export function registerPaymentRoutes(app: Express) {
           sessionParams.customer_email = user.email;
         }
 
+        console.log("Creating Stripe session with metadata:", sessionParams.metadata);
         const session = await stripe.checkout.sessions.create(sessionParams);
 
         res.json({ checkout_url: session.url });
@@ -310,10 +311,10 @@ export function registerStripeWebhook(app: Express) {
           const session = event.data.object as any;
           const userId = session.metadata?.userId;
           console.log(
-            "🎉 checkout.session.completed:",
-            session.id,
-            "User:",
-            userId
+            "Webhook: checkout.session.completed for userId:",
+            userId,
+            "session:",
+            session.id
           );
 
           if (userId) {
@@ -363,6 +364,7 @@ export function registerStripeWebhook(app: Express) {
               }
 
               if (customerId) {
+                console.log("Upgrading user to paid:", userId, "customerId:", customerId);
                 await storage.upgradeUserToPaid(userId, customerId);
                 console.log(
                   `✅ User ${userId} upgraded to paid status (customer ${customerId})`
