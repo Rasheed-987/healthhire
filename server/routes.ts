@@ -673,7 +673,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerLocalAuthRoutes(app);
 
   // Payment routes
-  // registerPaymentRoutes(app);
+  registerPaymentRoutes(app);
+  registerStripeWebhook(app);
 
   // Auth routes (password reset, etc.)
   registerAuthRoutes(app);
