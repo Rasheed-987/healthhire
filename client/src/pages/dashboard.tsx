@@ -198,14 +198,19 @@ export default function Dashboard() {
   useEffect(() => {
     if (!onboardingStatus || !user) return;
 
-    // If user has already completed onboarding, never show it again
-    if (onboardingStatus.hasCompletedOnboarding) {
+    // If user has already seen onboarding this session, don't show it again
+    if (hasCompletedOnboardingThisSession) return;
+
+    // Check the appropriate onboarding flag based on user type
+    const hasCompletedAppropriateOnboarding = isPaid
+      ? onboardingStatus.hasCompletedPremiumOnboarding
+      : onboardingStatus.hasCompletedOnboarding;
+
+    // If user has already completed the appropriate onboarding, never show it again
+    if (hasCompletedAppropriateOnboarding) {
       setShowOnboarding(false);
       return;
     }
-
-    // If user has already seen onboarding this session, don't show it again
-    if (hasCompletedOnboardingThisSession) return;
 
     const needsOnboarding = isPaid
       ? !onboardingStatus.hasCompletedPremiumOnboarding
