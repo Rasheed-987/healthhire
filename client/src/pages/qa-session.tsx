@@ -377,7 +377,7 @@ export default function QASession() {
                     {sessionData.session.jobTitle}
                   </h1>
                 </div>
-                <div className="text-sm text-gray-600 line-clamp-2 max-w-2xl">
+                <div className="text-sm text-gray-600 line-clamp-2 max-w-3xl">
                   {sessionData.session.jobDescription}
                 </div>
               </div>

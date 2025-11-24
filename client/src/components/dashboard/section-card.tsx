@@ -132,7 +132,7 @@ export default function SectionCard({
             </div>
             
             <p className="text-xs text-muted-foreground leading-relaxed" data-testid={`text-${id}-subtext`}>
-              {actionSubtext}
+              {actionSubtext || "\u00A0"}
             </p>
             
             {/* Upgrade Button for Locked Features with better styling */}
