@@ -44,3 +44,4 @@ local/
 gcs-key.json
 *-gcs-key.json
 service-account-key.json
+README.md
