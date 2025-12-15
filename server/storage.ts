@@ -1576,7 +1576,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAiPrompts(category?: string): Promise<any> {
     const query = db.select().from(aiPrompts);
-    if (category && category !== "all") {
+     if (category && category !== "all") {
       return await query
         .where(eq(aiPrompts.category, category))
         .orderBy(aiPrompts.name);

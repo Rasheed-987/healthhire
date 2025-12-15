@@ -269,9 +269,9 @@ export default function Login() {
             <p className="mt-6 text-xs text-center text-gray-500 leading-relaxed">
               By creating an account, you confirm that you have read,
               understood, and agree to the{" "}
-              <a href="/" className="underline hover:text-gray-700">
-                HealthHire Portal’s Terms of Use
-              </a>{" "}
+              <Link href="/terms-of-use" className="underline hover:text-gray-700">
+  HealthHire Portal’s Terms of Use
+</Link>{" "}
               and related policies.
             </p>
           </CardContent>
